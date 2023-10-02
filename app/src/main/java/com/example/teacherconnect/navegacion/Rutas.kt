@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.teacherconnect.PantallaCarga
 import com.example.teacherconnect.interfaces.login.LoginScreen
+import com.example.teacherconnect.interfaces.home.Home
 
 @Composable
 fun Rutas(){
@@ -17,6 +18,9 @@ fun Rutas(){
         }
         composable(Pantallas.LoginConexion.name){
             LoginScreen(navController=navController)
+        }
+        composable(Pantallas.HomeConexion.name){   
+             Home(navController=navController)
         }
     }
 }

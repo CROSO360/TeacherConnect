@@ -46,6 +46,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.teacherconnect.R
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import com.example.teacherconnect.navegacion.Pantallas
 
 @Composable
 fun GradientBackground(
@@ -68,58 +75,69 @@ fun GradientBackground(
     }
 }
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navController: NavController,
+ viewModel: LoginViewModel=androidx.lifecycle.viewmodel.compose.viewModel()) 
+ {
     GradientBackground {
         val showLoginForm = rememberSaveable {
             mutableStateOf(true)
         }
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ){
-            Image(
-                painter = painterResource(id = R.drawable.logo_blanco),
-                contentDescription = null,
-                modifier = Modifier.padding(10.dp)
-            )
-            if (showLoginForm.value) {
-                Text(text = "¡Bienvenido!", color = Color.White, fontSize = 40.sp,
-                    modifier = Modifier.padding(bottom = 50.dp))
-            } else {
-                Text(text = "¡Regístrate!", color = Color.White, fontSize = 40.sp,
-                    modifier = Modifier.padding(bottom = 50.dp) )
-            }
-            UserForm(showLoginForm = showLoginForm.value) { email, password ->
-                if (showLoginForm.value) {
-                    Log.d("TeacherConnect", "Iniciando sesión con $email y $password")
-
-                } else {
-                    Log.d("TeacherConnect", "Creando Cuenta con $email y $password")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(15.dp))
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val text1 =
-                    if (showLoginForm.value) "¿No tienes cuenta?"
-                    else "¿Ya tienes cuenta?"
-                val text2 =
-                    if (showLoginForm.value) "Regístrate"
-                    else "Inicia sesión"
-                Text(text = text1, color = Color.White)
-                Text(
-                    text = text2,
-                    modifier = Modifier
-                        .clickable { showLoginForm.value = !showLoginForm.value }
-                        .padding(start = 5.dp),
-                    color = Color.Cyan
+        val scrollState = rememberScrollState()
+            Box(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ){
+                Image(
+                    painter = painterResource(id = R.drawable.logo_blanco),
+                    contentDescription = null,
+                    modifier = Modifier.padding(10.dp).fillMaxSize(0.8f)
                 )
+                if (showLoginForm.value) {
+                    Text(text = "¡Bienvenido!", color = Color.White, fontSize = 30.sp,
+                        modifier = Modifier.padding(bottom = 50.dp))
+                } else {
+                    Text(text = "¡Regístrate!", color = Color.White, fontSize = 30.sp)
+                }
+                UserForm(showLoginForm = showLoginForm.value) { email, password ->
+                    if (showLoginForm.value) {
+                        Log.d("TeacherConnect", "Iniciando sesión con $email y $password")
+                        viewModel.signWithEmailAndPassword(email, password) {    
+                            navController.navigate(Pantallas.HomeConexion.name)
+                        }
+
+                    } else {
+                        Log.d("TeacherConnect", "Creando Cuenta con $email y $password")
+                         viewModel.createUserWithEmailAndPassword(email, password, name, occupation) {    
+                            navController.navigate(Pantallas.HomeConexion.name)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(15.dp))
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val text1 =
+                        if (showLoginForm.value) "¿No tienes cuenta?"
+                        else "¿Ya tienes cuenta?"
+                    val text2 =
+                        if (showLoginForm.value) "Regístrate"
+                        else "Inicia sesión"
+                    Text(text = text1, color = Color.White)
+                    Text(
+                        text = text2,
+                        modifier = Modifier
+                            .clickable { showLoginForm.value = !showLoginForm.value }
+                            .padding(start = 5.dp),
+                        color = Color.Cyan
+                    )
+                }
+                  Spacer(modifier = Modifier.height(50.dp))
             }
-        }
+            }
     }
 }
 
@@ -127,7 +145,7 @@ fun LoginScreen(navController: NavController) {
 @Composable
 fun UserForm(
     showLoginForm: Boolean,
-    onDone: (String, String) -> Unit = { email, password -> }
+    onDone: (String, String, String, String) -> Unit = { email, password, name, occupation -> }
 ) {
     val email = rememberSaveable {
         mutableStateOf("")
@@ -135,26 +153,73 @@ fun UserForm(
     val password = rememberSaveable {
         mutableStateOf("")
     }
+    val name = rememberSaveable {   
+         mutableStateOf("")
+    }
+    val occupation = rememberSaveable {
+    mutableStateOf("Profesor")
+    }
     val passwordVisible = rememberSaveable {
-        mutableStateOf(false)
+        mutableStateOf(false) 
     }
     val valido = remember(email.value, password.value) {
         email.value.trim().isNotEmpty() &&
                 password.value.trim().isNotEmpty()
     }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val occupations = listOf("Profesor", "Estudiante")
+
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         EmailInput(emailState = email)
         PasswordInput(passwordState = password, labelId = "Password", passwordVisible = passwordVisible)
+        if (!showLoginForm) {
+            InputField(valueState = name, labelId = "Nombre", labelColor = Color.White, keyboardType = KeyboardType.Text)
+            Column(modifier = Modifier.fillMaxWidth(0.75f)) {
+                Text(text = "Ocupación", color = Color.White, modifier = Modifier.padding(top = 23 .dp, start = 16.dp))
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    occupations.forEach { option ->
+                        Row(
+                            Modifier
+                                .padding(8.dp)
+                                .selectable(
+                                    selected = (option == occupation.value),
+                                    onClick = {
+                                        occupation.value = option
+                                    }
+                                ),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = option == occupation.value,
+                                onClick = {
+                                    occupation.value = option
+                                },
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = Color.White,
+                                    unselectedColor = Color.White
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(1.dp))
+                            Text(text = option, color = Color.White)
+                        }
+                    }
+                }
+            }
 
+        }
         if (showLoginForm) {
             SubmitButton(textId = "Login", inputValido = valido) {
-                onDone(email.value.trim(), password.value.trim())
+                onDone(email.value.trim(), password.value.trim(),
+                name.value.trim(),occupation.value.trim())
                 keyboardController?.hide()
             }
         } else {
             SubmitButton(textId = "Crear cuenta", inputValido = valido) {
-                onDone(email.value.trim(), password.value.trim())
+                onDone(email.value.trim(), password.value.trim()
+                ,name.value.trim(),occupation.value.trim())
                 keyboardController?.hide()
             }
         }
