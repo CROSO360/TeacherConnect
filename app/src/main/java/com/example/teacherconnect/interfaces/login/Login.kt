@@ -100,7 +100,7 @@ fun LoginScreen(navController: NavController,
                 } else {
                     Text(text = "¡Regístrate!", color = Color.White, fontSize = 30.sp)
                 }
-                UserForm(showLoginForm = showLoginForm.value) { email, password ->
+                UserForm(showLoginForm = showLoginForm.value) { email, password, name, occupation ->
                     if (showLoginForm.value) {
                         Log.d("TeacherConnect", "Iniciando sesión con $email y $password")
                         viewModel.signWithEmailAndPassword(email, password) {    
