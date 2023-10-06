@@ -40,7 +40,7 @@ fun PantallaCarga(navController: NavController){
 
                 )
             delay(2000L)
-            navController.navigate(Pantallas.LoginConexion.name)
+            navController.navigate(Pantallas.Horario_homeConexion.name)
         }
         Column(
             modifier = Modifier.fillMaxSize(),
