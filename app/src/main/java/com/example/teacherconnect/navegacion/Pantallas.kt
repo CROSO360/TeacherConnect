@@ -6,6 +6,8 @@ enum class Pantallas {
     HomeConexion,
     Horario_homeConexion,
     Horario_formulario1Conexion,
-    Horario_formulario2Conexion
+    Horario_formulario2Conexion,
+    Home_CanalConexion,
+    Crear_CanalformularioConexion
 
 }
