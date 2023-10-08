@@ -50,6 +50,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import com.example.teacherconnect.navegacion.Pantallas
@@ -74,6 +75,7 @@ fun GradientBackground(
         content()
     }
 }
+
 @Composable
 fun LoginScreen(navController: NavController,
  viewModel: LoginViewModel=androidx.lifecycle.viewmodel.compose.viewModel()) 
@@ -82,8 +84,19 @@ fun LoginScreen(navController: NavController,
         val showLoginForm = rememberSaveable {
             mutableStateOf(true)
         }
+        val email = rememberSaveable {
+            mutableStateOf("")
+        }
+        val password = rememberSaveable {
+            mutableStateOf("")
+        }
+        fun resetEmailAndPassword() {
+            email.value = ""
+            password.value = ""
+        }
+        val showDialog = remember { mutableStateOf(false) }
         val scrollState = rememberScrollState()
-            Box(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
+        Box(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -100,19 +113,42 @@ fun LoginScreen(navController: NavController,
                 } else {
                     Text(text = "¡Regístrate!", color = Color.White, fontSize = 30.sp)
                 }
-                UserForm(showLoginForm = showLoginForm.value) { email, password, name, occupation ->
+                UserForm(showLoginForm = showLoginForm.value, email = email, password = password) { email, password, name, occupation ->
                     if (showLoginForm.value) {
                         Log.d("TeacherConnect", "Iniciando sesión con $email y $password")
-                        viewModel.signWithEmailAndPassword(email, password) {    
-                            navController.navigate(Pantallas.HomeConexion.name)
+                        viewModel.signWithEmailAndPassword(email, password) { result->
+                            when (result) {
+                                is LoginViewModel.SignInResult.Success -> navController.navigate(Pantallas.HomeConexion.name)
+                                else -> showDialog.value = true
+                            }
                         }
 
                     } else {
                         Log.d("TeacherConnect", "Creando Cuenta con $email y $password")
-                         viewModel.createUserWithEmailAndPassword(email, password, name, occupation) {    
-                            navController.navigate(Pantallas.HomeConexion.name)
+                         viewModel.createUserWithEmailAndPassword(email, password, name, occupation) {
+                             showLoginForm.value = true
                         }
                     }
+                }
+                if (showDialog.value) {
+                    AlertDialog(
+                        onDismissRequest = {
+                            showDialog.value = false
+                        },
+                        title = {
+                            Text(text = "Error al iniciar sesión")
+                        },
+                        text = {
+                            Text(text = "Credenciales incorrectas")
+                        },
+                        confirmButton = {
+                            Button(onClick = {
+                                showDialog.value = false
+                            }) {
+                                Text("Aceptar")
+                            }
+                        }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(15.dp))
@@ -130,29 +166,28 @@ fun LoginScreen(navController: NavController,
                     Text(
                         text = text2,
                         modifier = Modifier
-                            .clickable { showLoginForm.value = !showLoginForm.value }
+                            .clickable {
+                                showLoginForm.value = !showLoginForm.value
+                                resetEmailAndPassword()
+                            }
                             .padding(start = 5.dp),
                         color = Color.Cyan
                     )
                 }
                   Spacer(modifier = Modifier.height(50.dp))
             }
-            }
+        }
     }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun UserForm(
-    showLoginForm: Boolean,
+    showLoginForm: Boolean,email: MutableState<String>,
+    password: MutableState<String>,
     onDone: (String, String, String, String) -> Unit = { email, password, name, occupation -> }
 ) {
-    val email = rememberSaveable {
-        mutableStateOf("")
-    }
-    val password = rememberSaveable {
-        mutableStateOf("")
-    }
+
     val name = rememberSaveable {   
          mutableStateOf("")
     }
@@ -221,6 +256,10 @@ fun UserForm(
                 onDone(email.value.trim(), password.value.trim()
                 ,name.value.trim(),occupation.value.trim())
                 keyboardController?.hide()
+                email.value = ""
+                password.value = ""
+                name.value = ""
+                occupation.value = "Profesor"
             }
         }
     }

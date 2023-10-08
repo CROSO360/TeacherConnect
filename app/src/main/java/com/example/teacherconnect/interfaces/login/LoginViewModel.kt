@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teacherconnect.firebase.Usuarios
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
@@ -16,17 +18,33 @@ class LoginViewModel: ViewModel(){
     private val auth:FirebaseAuth=Firebase.auth
     private val _loading= MutableLiveData(false)
 
-    fun signWithEmailAndPassword(email:String,password:String, home: ()->Unit)
+    fun signWithEmailAndPassword(email:String,password:String, onResult: (SignInResult) -> Unit)
             = viewModelScope.launch {
         try {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener {  task->
                     if(task.isSuccessful){
                         Log.d("Inicio","Hecho brou")
-                        home()
+                        onResult(SignInResult.Success)
                     }
-                    else{
-                        Log.d("Inicio","Error: ${task.result.toString()}")
+                    else {
+                        val exception = task.exception
+                        Log.d("ErrorFirebase", exception?.message ?: "Error sin mensaje")
+
+                        when (exception) {
+                            is FirebaseAuthInvalidUserException -> {
+                                // El correo electrónico no corresponde a ninguna cuenta
+                                onResult(SignInResult.EmailError)
+                            }
+                            is FirebaseAuthInvalidCredentialsException -> {
+                                // Contraseña incorrecta para el correo electrónico dado
+                                onResult(SignInResult.PasswordError)
+                            }
+                            else -> {
+                                // Manejar otros errores
+                                onResult(SignInResult.UnknownError)
+                            }
+                        }
                     }
                 }
         }
@@ -56,18 +74,28 @@ class LoginViewModel: ViewModel(){
         val userId=auth.currentUser?.uid
 
         val user=Usuarios(
-            id=userId.toString(),
+            id=null,
             email= email,
             password= password,
             name= name,
             occupation= occupation
         ).toMap()
-        FirebaseFirestore.getInstance().collection("users")
-            .add(user)
-            .addOnSuccessListener {
-                Log.d("TeacherConnect","Creado ${it.id}")
-            }.addOnFailureListener {
-                Log.d("TeacherConnect", "Error: ${it}")
+        val userRef = FirebaseFirestore.getInstance().collection("users").document(userId.toString())
+        userRef.set(user.toMap()).addOnSuccessListener {
+            userRef.update("id", userRef.id).addOnSuccessListener {
+                Log.d("TeacherConnect", "Creado ${userId.toString()}")
             }
+        }.addOnFailureListener {
+            Log.d("TeacherConnect", "Error: ${it}")
+        }
+    }
+    sealed class SignInResult {
+        object Success : SignInResult()
+        object PasswordError : SignInResult()
+        object EmailError : SignInResult()
+        object UnknownError : SignInResult()
+    }
+    fun logout(){
+        auth.signOut()
     }
 }

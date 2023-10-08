@@ -1,7 +1,9 @@
 package com.example.teacherconnect.interfaces.home
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,12 +31,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.teacherconnect.R
+import com.example.teacherconnect.interfaces.login.LoginViewModel
+import com.example.teacherconnect.navegacion.Pantallas
+import kotlin.system.exitProcess
 
 @Composable
-fun Home(navController: NavController){
+fun Home(navController: NavController,viewModel: LoginViewModel =androidx.lifecycle.viewmodel.compose.viewModel()){
     GradientBackground {
+        BackHandler {
+            exitProcess(0)
+        }
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -126,14 +135,22 @@ fun Home(navController: NavController){
                 Image(
                     painter = painterResource(id = R.drawable.sistema_avisos),
                     contentDescription = null,
-                    modifier = Modifier.size(110.dp)
+                    modifier = Modifier
+                        .size(110.dp)
+                        .clickable {
+                            navController.navigate(Pantallas.Home_CanalConexion.name)
+                        }
                 )
                 Text(text = "Sistema de Avisos", style = TextStyle(fontSize = 18.sp, color = Color.White, fontWeight = FontWeight.Bold))
                 Spacer(modifier = Modifier.height(40.dp))
                 Image(
                     painter = painterResource(id = R.drawable.gestiona_horario),
                     contentDescription = null,
-                    modifier = Modifier.size(100.dp)
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clickable {
+                            navController.navigate(Pantallas.Horario_homeConexion.name)
+                        }
                 )
                 Text(text = "Gestiona tu Horario", style = TextStyle(fontSize = 18.sp, color = Color.White, fontWeight = FontWeight.Bold))
             }
@@ -144,6 +161,13 @@ fun Home(navController: NavController){
                     .align(Alignment.BottomStart)
                     .size(60.dp)
                     .padding(bottom = 20.dp, start = 20.dp)
+                    .clickable {
+                        viewModel.logout()
+                        navController.navigate(Pantallas.LoginConexion.name) {
+                            // Limpia la pila de navegación para que no puedas volver atrás
+                            popUpTo(Pantallas.HomeConexion.name) { inclusive = true }
+                        }
+                    }
             )
             Image(
                 painter = painterResource(id = R.drawable.icono_soporte),

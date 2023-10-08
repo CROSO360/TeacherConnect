@@ -8,6 +8,6 @@ enum class Pantallas {
     Horario_formulario1Conexion,
     Horario_formulario2Conexion,
     Home_CanalConexion,
-    Crear_CanalformularioConexion
+    TusCanalesConexion
 
 }

@@ -22,10 +22,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.teacherconnect.R
 
 @Composable
-fun ChannelScreen(){
+fun ChannelScreen(navController: NavController){
     Box(
         modifier = Modifier.fillMaxSize().background(Color.Black)
     ) {
