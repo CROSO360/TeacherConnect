@@ -4,15 +4,16 @@ import android.util.Log
 import com.example.teacherconnect.firebase.Canales
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.MutableLiveData
 
-class CanalViewModel {
+
+class CanalViewModel : ViewModel(){
     private val firestore = FirebaseFirestore.getInstance()
 
     fun createCanal(canal: Canales, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
-        // Crear una referencia para un nuevo documento (canal) en Firestore
         val canalRef = FirebaseFirestore.getInstance().collection("canales").document()
 
-        // Establecer el canal en Firestore
         canalRef.set(canal.toMap()).addOnSuccessListener {
             canalRef.update("id", canalRef.id).addOnSuccessListener {
                 onSuccess(canalRef.id)
@@ -35,5 +36,25 @@ class CanalViewModel {
                 Log.d("TeacherConnect", "Error añadiendo canal: ${it}")
             }
     }
+    val canales = MutableLiveData<List<Canales>>()
+
+    fun CanalesDelUsuario(userId: String) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                val canalIds = document["canales"] as? List<String> ?: listOf()
+                if (canalIds.isNotEmpty()) {
+                    db.collection("canales").whereIn("id", canalIds).get()
+                        .addOnSuccessListener { querySnapshot ->
+                            val canalesList = querySnapshot.documents.mapNotNull { it.toObject(Canales::class.java) }
+                            canales.value = canalesList
+                        }
+                } else {
+                    canales.value = listOf()
+                }
+            }
+
+    }
+
 
 }

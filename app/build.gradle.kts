@@ -69,7 +69,9 @@ dependencies {
 
 
     implementation("androidx.compose.material:material-icons-extended:1.3.1")
-
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0-alpha02")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.5.3")
+    implementation ("androidx.compose.foundation:foundation:1.0.0-alpha12")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

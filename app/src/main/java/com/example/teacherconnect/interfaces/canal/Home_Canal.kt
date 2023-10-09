@@ -80,23 +80,19 @@ fun Home_CanalScreen(navController: NavController) {
                 .width(230.dp)
                 .height(170.dp)
         )
-
-        // Botón "Volver"
-        TextButton(
-            onClick = { navController.navigate(Pantallas.HomeConexion.name) },
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(start = 15.dp, top = 180.dp)
-        ) {
-            Text("< Volver", color = Color.White, fontSize = 18.sp)
-        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            // Botón "Volver"
+            Text(text = "< Volver", color = Color.White, fontSize = 18.sp,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start=30.dp)
+                    .clickable {navController.navigate(Pantallas.HomeConexion.name)}
+            )
             Spacer(modifier = Modifier.height(20.dp))
 
             // Fila con los botones "Tus canales" y "Tus avisos"
@@ -114,6 +110,7 @@ fun Home_CanalScreen(navController: NavController) {
                         modifier = Modifier
                             .size(130.dp)
                             .clickable {
+                                navController.navigate(Pantallas.TusCanalesConexion.name)
                             }
                     )
                     Text(
@@ -151,7 +148,8 @@ fun Home_CanalScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(20.dp))
 
             // Botón "Crear un nuevo canal"
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.align(Alignment.CenterHorizontally)) {
                 Image(
                     painter = painterResource(id = R.drawable.icono_nuevo_canal),
                     contentDescription = null,

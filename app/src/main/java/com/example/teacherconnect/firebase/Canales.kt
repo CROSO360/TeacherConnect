@@ -2,8 +2,8 @@ package com.example.teacherconnect.firebase
 
 data class Canales(
     val id: String?=null,
-    val nombreCanal: String,
-    val usuarioId: String
+    val nombreCanal: String="",
+    val usuarioId: String=""
 ) {
     fun toMap(): Map<String, Any> {
         val result = mutableMapOf(
