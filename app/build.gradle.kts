@@ -66,6 +66,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
+    implementation("com.google.firebase:firebase-storage-ktx")
+    implementation ("io.coil-kt:coil-compose:1.3.2")
 
 
     implementation("androidx.compose.material:material-icons-extended:1.3.1")

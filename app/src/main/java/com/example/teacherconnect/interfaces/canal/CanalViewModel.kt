@@ -6,6 +6,8 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
+import com.example.teacherconnect.firebase.Imagenes
 
 
 class CanalViewModel : ViewModel(){
@@ -55,6 +57,17 @@ class CanalViewModel : ViewModel(){
             }
 
     }
-
+    fun obtenerImagenesEmoji(): LiveData<List<Imagenes>> {
+        val liveData = MutableLiveData<List<Imagenes>>()
+        val db = FirebaseFirestore.getInstance()
+        db.collection("imagenes")
+            .whereEqualTo("categoria", "emoji")
+            .get()
+            .addOnSuccessListener { result ->
+                val images = result.map { it.toObject(Imagenes::class.java) }
+                liveData.value = images
+            }
+        return liveData
+    }
 
 }

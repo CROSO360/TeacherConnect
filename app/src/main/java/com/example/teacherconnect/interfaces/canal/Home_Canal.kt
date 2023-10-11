@@ -47,6 +47,12 @@ import com.example.teacherconnect.firebase.Canales
 import com.example.teacherconnect.interfaces.login.LoginViewModel
 import com.example.teacherconnect.navegacion.Pantallas
 import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import coil.compose.rememberImagePainter
+import com.example.teacherconnect.firebase.Imagenes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +61,8 @@ fun Home_CanalScreen(navController: NavController) {
     val canalName = rememberSaveable { mutableStateOf("") }
     val canalviewmodel = CanalViewModel()
     val auth = FirebaseAuth.getInstance()
+    val selectedImage = rememberSaveable { mutableStateOf(-1) }
+    val imagenesEmoji: List<Imagenes> by canalviewmodel.obtenerImagenesEmoji().observeAsState(listOf())
 
 
     Box(
@@ -174,11 +182,45 @@ fun Home_CanalScreen(navController: NavController) {
                 onDismissRequest = { showDialog.value = false },
                 title = { Text(text = "Crear un nuevo canal") },
                 text = {
-                    TextField(
-                        value = canalName.value,
-                        onValueChange = { canalName.value = it },
-                        label = { Text("Nombre del canal") }
-                    )
+                    Column {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start
+                        ) {
+                            if (selectedImage.value in imagenesEmoji.indices) {
+                                Image(
+                                    painter = rememberImagePainter(data = imagenesEmoji[selectedImage.value].url),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(50.dp)  // puedes ajustar el tamaÃ±o a tu preferencia
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))  // espacio entre la imagen y el TextField
+                            }
+                            TextField(
+                                value = canalName.value,
+                                onValueChange = { canalName.value = it },
+                                label = { Text("Nombre del canal") }
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(text = "Selecciona el emoji de tu canal:")
+                        LazyRow(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(top = 16.dp)
+                        ) {
+                            items(imagenesEmoji) { imagen ->
+                                RadioButtonImageOption(
+                                    imageUrl = imagen.url,
+                                    isSelected = selectedImage.value == imagenesEmoji.indexOf(imagen),
+                                    onSelected = {
+                                        selectedImage.value = imagenesEmoji.indexOf(imagen)
+                                    }
+                                )
+                            }
+
+
+                        }
+                    }
                 },
                 confirmButton = {
                     Row(
@@ -197,26 +239,31 @@ fun Home_CanalScreen(navController: NavController) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(onClick = {
                             val usuarioId = auth.currentUser?.uid ?: return@Button
+                            if (selectedImage.value in imagenesEmoji.indices) {
+                                val imagenId = imagenesEmoji[selectedImage.value].id ?: ""
 
-                            // Crear una instancia de Canal
-                            val canal = Canales(
-                                id = null,
-                                nombreCanal = canalName.value,
-                                usuarioId = usuarioId
-                            )
+                                val canal = Canales(
+                                    id = null,
+                                    nombreCanal = canalName.value,
+                                    usuarioId = usuarioId,
+                                    imagenId = imagenId
+                                )
 
-                            canalviewmodel.createCanal(
-                                canal,
-                                onSuccess = { id ->
-                                    Log.d("TeacherConnect", "Canal creado: $id")
-                                    canalviewmodel.addCanalToUser(usuarioId, id)
-                                    canalName.value = ""
-                                    showDialog.value = false
-                                },
-                                onFailure = {
-                                    Log.d("TeacherConnect", "Error al crear canal: ${it}")
-                                }
-                            )
+                                canalviewmodel.createCanal(
+                                    canal,
+                                    onSuccess = { id ->
+                                        Log.d("TeacherConnect", "Canal creado: $id")
+                                        canalviewmodel.addCanalToUser(usuarioId, id)
+                                        canalName.value = ""
+                                        showDialog.value = false
+                                    },
+                                    onFailure = {
+                                        Log.d("TeacherConnect", "Error al crear canal: ${it}")
+                                    }
+                                )
+                            }else {
+                                Log.d("TeacherConnect", "No se ha seleccionado ninguna imagen")
+                            }
                         }) {
                             Text("Crear")
                         }
@@ -238,5 +285,23 @@ fun Home_CanalScreen(navController: NavController) {
         )
     }
 }
-
+@Composable
+fun RadioButtonImageOption(
+    imageUrl: String,
+    isSelected: Boolean,
+    onSelected: () -> Unit
+) {
+    Box(
+        modifier = Modifier.clickable(onClick = onSelected),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = rememberImagePainter(data = imageUrl),
+            contentDescription = null,
+            modifier = Modifier
+                .size(75.dp)
+                .background(if (isSelected) Color.Gray.copy(alpha = 0.3f) else Color.Transparent)
+        )
+    }
+}
 

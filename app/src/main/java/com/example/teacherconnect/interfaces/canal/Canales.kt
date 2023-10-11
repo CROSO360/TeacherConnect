@@ -38,6 +38,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.text.font.FontWeight
 import com.example.teacherconnect.firebase.Canales
 import com.example.teacherconnect.navegacion.Pantallas
+import coil.compose.rememberImagePainter
+import com.example.teacherconnect.firebase.Imagenes
 
 @Composable
 fun ChannelScreen(navController: NavController){
@@ -71,7 +73,10 @@ fun ChannelScreen(navController: NavController){
                 canalViewModel.CanalesDelUsuario(it)
             }
         }
-
+        val imagenes by canalViewModel.obtenerImagenesEmoji().observeAsState(listOf())
+        LaunchedEffect(Unit) {
+            canalViewModel.obtenerImagenesEmoji()
+        }
         val canales by canalViewModel.canales.observeAsState(listOf())
         Column(
             modifier = Modifier
@@ -87,7 +92,7 @@ fun ChannelScreen(navController: NavController){
             if (canales.isEmpty()) {
                 showDialog.value = true
             } else {
-                ListaDeCanales(canales = canales, modifier = Modifier.weight(1f))
+                ListaDeCanales(canales = canales, imagenes=imagenes,modifier = Modifier.weight(1f))
             }
         }
         if (showDialog.value) {
@@ -126,17 +131,17 @@ fun ChannelScreen(navController: NavController){
 }
 
 @Composable
-fun ListaDeCanales(canales: List<Canales>, modifier: Modifier = Modifier) {
+fun ListaDeCanales(canales: List<Canales>, imagenes: List<Imagenes>, modifier: Modifier = Modifier) {
     LazyColumn(modifier = modifier.padding(8.dp)) {
         items(canales.chunked(2)) { chunkedCanales ->
             Row(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp)
             ) {
-                CanalItem(chunkedCanales[0], Modifier.weight(1f))
+                CanalItem(chunkedCanales[0], imagenes, Modifier.weight(1f))
                 Spacer(Modifier.width(8.dp))
                 if (chunkedCanales.size > 1) {
-                    CanalItem(chunkedCanales[1], Modifier.weight(1f))
+                    CanalItem(chunkedCanales[1], imagenes, Modifier.weight(1f))
                 }
             }
         }
@@ -145,7 +150,8 @@ fun ListaDeCanales(canales: List<Canales>, modifier: Modifier = Modifier) {
 
 
 @Composable
-fun CanalItem(canal: Canales, modifier: Modifier = Modifier) {
+fun CanalItem(canal: Canales, imagenes: List<Imagenes>, modifier: Modifier = Modifier) {
+    val imagenCanal = imagenes.find { it.id == canal.imagenId }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -155,9 +161,9 @@ fun CanalItem(canal: Canales, modifier: Modifier = Modifier) {
             .background(Color.Transparent, shape = MaterialTheme.shapes.medium)
     ) {
         Image(
-            painter = painterResource(id = R.drawable.emoji1),
+            painter = rememberImagePainter(data = imagenCanal?.url),
             contentDescription = null,
-            modifier = Modifier.size(75.dp)
+            modifier = Modifier.size(90.dp)
         )
         Text(text = canal.nombreCanal, color = Color.White, fontSize = 14.sp)
     }
