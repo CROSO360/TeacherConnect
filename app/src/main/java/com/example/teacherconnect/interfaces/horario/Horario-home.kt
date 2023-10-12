@@ -1,6 +1,7 @@
 package com.example.teacherconnect.interfaces.horario
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -25,20 +27,40 @@ import androidx.navigation.NavController
 import com.example.teacherconnect.R
 import com.example.teacherconnect.navegacion.Pantallas
 
-
+@Composable
+fun FondoHome(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF0E0A0B),
+                        Color(0xFF495765)
+                    )
+                )
+            )
+    ) {
+        content()
+    }
+}
 @Composable
 fun HorarioHomeScreen(navController: NavController) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .offset(y = 165.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Button(
-            onClick = { navController.navigate(Pantallas.Horario_formulario1Conexion.name) },
-            colors = ButtonDefaults.run { buttonColors(Color.Transparent) },
-            contentPadding = PaddingValues(0.dp)
-        )  {
+    FondoHome {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .offset(y = 165.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Button(
+                onClick = { navController.navigate(Pantallas.Horario_formulario1Conexion.name) },
+                colors = ButtonDefaults.run { buttonColors(Color.Transparent) },
+                contentPadding = PaddingValues(0.dp)
+            ) {
                 Image(
                     painter = painterResource(id = R.drawable.crear),
                     contentDescription = "Descripción de la imagen",
@@ -48,70 +70,80 @@ fun HorarioHomeScreen(navController: NavController) {
                 )
             }
 
-    }
-    Image(
-        painter = painterResource(id = R.drawable.fondo3),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier.fillMaxSize()
-    )
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomStart
-    ) {
-        Text(
-            text = "< Volver",
-            color = Color.White,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
+        }
+        Image(
+            painter = painterResource(id = R.drawable.icon),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
-                .padding(27.dp)
-                .clickable(onClick = { })
+                .offset(x = (185).dp, y = (16).dp)
+                .width(160.dp)
+                .height(160.dp)
         )
-
-
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .offset(x = (100).dp, y = (-35).dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Button(
-            onClick = {  },
-            colors = ButtonDefaults.run { buttonColors(Color.Transparent) },
-            contentPadding = PaddingValues(0.dp)
+        Image(
+            painter = painterResource(id = R.drawable.fondo2),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomStart
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.mod),
-                contentDescription = "Descripción de la imagen",
+            Text(
+                text = "< Volver",
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier
-                    .width(170.dp)
-                    .height(160.dp)
+                    .padding(27.dp)
+                    .clickable(onClick = { })
             )
-        }
 
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .offset(x = (-100).dp, y = (-35).dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Button(
-            onClick = { /* acción del botón 1 */ },
-            colors = ButtonDefaults.run { buttonColors(Color.Transparent) },
-            contentPadding = PaddingValues(0.dp)
+
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .offset(x = (100).dp, y = (-35).dp),
+            contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.ver),
-                contentDescription = "Descripción de la imagen",
-                modifier = Modifier
-                    .width(170.dp)
-                    .height(160.dp)
-            )
-        }
+            Button(
+                onClick = { },
+                colors = ButtonDefaults.run { buttonColors(Color.Transparent) },
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.mod),
+                    contentDescription = "Descripción de la imagen",
+                    modifier = Modifier
+                        .width(170.dp)
+                        .height(160.dp)
+                )
+            }
 
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .offset(x = (-100).dp, y = (-35).dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Button(
+                onClick = { navController.navigate(Pantallas.Horario_verConexion.name) },
+                colors = ButtonDefaults.run { buttonColors(Color.Transparent) },
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ver),
+                    contentDescription = "Descripción de la imagen",
+                    modifier = Modifier
+                        .width(170.dp)
+                        .height(160.dp)
+                )
+            }
+
+        }
     }
 }
 
