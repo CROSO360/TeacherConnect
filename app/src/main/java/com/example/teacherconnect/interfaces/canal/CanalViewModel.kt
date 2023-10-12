@@ -8,7 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.LiveData
 import com.example.teacherconnect.firebase.Imagenes
-
+import com.example.teacherconnect.firebase.Usuarios
+import com.google.firebase.auth.FirebaseAuth
 
 class CanalViewModel : ViewModel(){
     private val firestore = FirebaseFirestore.getInstance()
@@ -68,6 +69,49 @@ class CanalViewModel : ViewModel(){
                 liveData.value = images
             }
         return liveData
+    }
+    fun obtenerUsuarioPorId(userId: String): LiveData<Usuarios?> {
+        val liveData = MutableLiveData<Usuarios?>()
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users")
+            .document(userId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val user = snapshot.toObject(Usuarios::class.java)
+                liveData.value = user
+            }
+        return liveData
+    }
+
+    fun unirUsuarioACanalPorPin(pin: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val canalRef = db.collection("canales")
+            .whereEqualTo("pin", pin)
+
+        canalRef.get().addOnSuccessListener { snapshot ->
+            if (!snapshot.isEmpty) {
+                val canalDocument = snapshot.documents[0]
+                val usuarioId = FirebaseAuth.getInstance().currentUser?.uid
+
+                if (usuarioId != null) {
+                    canalDocument.reference
+                        .update("estudiantes", FieldValue.arrayUnion(usuarioId))
+                        .addOnSuccessListener {
+                            val usuarioRef = db.collection("users").document(usuarioId)
+                            usuarioRef.update("canales", FieldValue.arrayUnion(canalDocument.id))
+                                .addOnSuccessListener { onSuccess() }
+                                .addOnFailureListener { e -> onFailure(e) }
+                        }
+                        .addOnFailureListener { e -> onFailure(e) }
+                } else {
+                    onFailure(Exception("Usuario no autenticado"))
+                }
+            } else {
+                onFailure(Exception("No se encontró canal con el PIN proporcionado."))
+            }
+        }.addOnFailureListener { e ->
+            onFailure(e)
+        }
     }
 
 }

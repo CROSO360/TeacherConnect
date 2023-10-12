@@ -2,10 +2,10 @@ package com.example.teacherconnect.firebase
 
 data class Usuarios(
                     val id: String?=null,
-                    val email: String,
-                    val password: String,
-                    val name: String,
-                    val occupation: String,
+                    val email: String="",
+                    val password: String="",
+                    val name: String="",
+                    val occupation: String="",
                     val canales: List<String> = listOf()
 ){
     fun toMap(): MutableMap<String, Any>{

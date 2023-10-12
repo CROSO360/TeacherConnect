@@ -53,6 +53,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import coil.compose.rememberImagePainter
 import com.example.teacherconnect.firebase.Imagenes
+import androidx.compose.runtime.remember
+import com.example.teacherconnect.firebase.Usuarios
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,6 +65,13 @@ fun Home_CanalScreen(navController: NavController) {
     val auth = FirebaseAuth.getInstance()
     val selectedImage = rememberSaveable { mutableStateOf(-1) }
     val imagenesEmoji: List<Imagenes> by canalviewmodel.obtenerImagenesEmoji().observeAsState(listOf())
+    val showDialogUnirte = rememberSaveable { mutableStateOf(false) }
+    val showDialogUnirSuccess = rememberSaveable { mutableStateOf(false) }
+    val canalPin = rememberSaveable { mutableStateOf("") }
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
+    val user: Usuarios? by canalviewmodel.obtenerUsuarioPorId(userId ?: "").observeAsState(null)
+    val pin = rememberSaveable { mutableStateOf(generateRandomPin()) }
+    val errorMessage = remember { mutableStateOf<String?>(null) }
 
 
     Box(
@@ -158,24 +167,121 @@ fun Home_CanalScreen(navController: NavController) {
             // Botón "Crear un nuevo canal"
             Column(horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                Image(
-                    painter = painterResource(id = R.drawable.icono_nuevo_canal),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(130.dp)
-                        .clickable {
-                            showDialog.value = true
-                        }
-                )
-                Text(
-                    text = "Crear un nuevo canal",
-                    style = TextStyle(
-                        fontSize = 18.sp,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
+                if (user?.occupation == "Profesor") {
+                    Image(
+                        painter = painterResource(id = R.drawable.icono_nuevo_canal),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(130.dp)
+                            .clickable {
+                                showDialog.value = true
+                            }
                     )
-                )
+                    Text(
+                        text = "Crear un nuevo canal",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+                else if (user?.occupation == "Estudiante") {
+                    Image(
+                        painter = painterResource(id = R.drawable.icon_unirte_canal),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(130.dp)
+                            .clickable {
+                                showDialogUnirte.value = true
+                            }
+                    )
+                    Text(
+                        text = "Unirte a un canal",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
             }
+        }
+        if (showDialogUnirSuccess.value){
+            AlertDialog(
+                onDismissRequest = { showDialogUnirSuccess.value = false
+                },
+                title = { Text(text = "PIN:") },
+                text = {
+                    Text(text = "Se uniÃ³ correctamente al canal.")
+
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        showDialogUnirSuccess.value = false
+                    }) {
+                        Text("Salir")
+                    }
+                }
+            )
+        }
+
+        if (showDialogUnirte.value){
+            AlertDialog(
+                onDismissRequest = { showDialogUnirte.value = false
+                    errorMessage.value = null
+                },
+                title = { Text(text = "Unirte a un canal") },
+                text = {
+                    Column{
+                        TextField(
+                            value = canalPin.value,
+                            onValueChange = { canalPin.value = it
+                                errorMessage.value = null },
+                            label = { Text("Pin del canal") }
+                        )
+                        errorMessage.value?.let {
+                            Text(it, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
+                        }
+                    }
+
+                },
+                confirmButton = {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Button(onClick = {
+                            showDialogUnirte.value = false
+                            canalPin.value = ""
+                            errorMessage.value = null
+
+                        }) {
+                            Text("Cancelar")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(onClick = {
+                            canalviewmodel.unirUsuarioACanalPorPin(
+                                pin = canalPin.value,
+                                onSuccess = {
+                                    showDialogUnirte.value = false
+                                    canalPin.value = ""
+                                    showDialogUnirSuccess.value=true
+                                },
+                                onFailure = { e ->
+                                    errorMessage.value = "El pin que ingresaste no existe."
+                                    Log.d("Error", "Error al unirse al canal: ${e.message}")
+                                }
+                            )
+                        }) {
+                            Text("Unirte")
+                        }
+                    }
+                }
+            )
         }
         if (showDialog.value) {
             AlertDialog(
@@ -191,16 +297,31 @@ fun Home_CanalScreen(navController: NavController) {
                                 Image(
                                     painter = rememberImagePainter(data = imagenesEmoji[selectedImage.value].url),
                                     contentDescription = null,
-                                    modifier = Modifier.size(50.dp)  // puedes ajustar el tamaÃ±o a tu preferencia
+                                    modifier = Modifier.size(50.dp)
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))  // espacio entre la imagen y el TextField
+                                Spacer(modifier = Modifier.width(8.dp))
                             }
+
                             TextField(
                                 value = canalName.value,
                                 onValueChange = { canalName.value = it },
                                 label = { Text("Nombre del canal") }
                             )
                         }
+                        Spacer(modifier = Modifier.height(5.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start
+                        ){
+                            Text(text = "PIN: ${pin.value}", style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(onClick = {
+                                pin.value = generateRandomPin()
+                            }) {
+                                Text("Regenerar PIN")
+                            }
+                        }
+
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(text = "Selecciona el emoji de tu canal:")
                         LazyRow(
@@ -245,8 +366,9 @@ fun Home_CanalScreen(navController: NavController) {
                                 val canal = Canales(
                                     id = null,
                                     nombreCanal = canalName.value,
-                                    usuarioId = usuarioId,
-                                    imagenId = imagenId
+                                    profesorId = usuarioId,
+                                    imagenId = imagenId,
+                                    pin= pin.value
                                 )
 
                                 canalviewmodel.createCanal(
@@ -303,5 +425,12 @@ fun RadioButtonImageOption(
                 .background(if (isSelected) Color.Gray.copy(alpha = 0.3f) else Color.Transparent)
         )
     }
+}
+
+fun generateRandomPin(): String {
+    val allowedChars = ('A'..'Z') + ('0'..'9')
+    return (1..7)
+        .map { allowedChars.random() }
+        .joinToString("")
 }
 
