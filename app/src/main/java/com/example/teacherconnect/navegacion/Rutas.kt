@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.teacherconnect.PantallaCarga
 import com.example.teacherconnect.interfaces.canal.ChannelScreen
 import com.example.teacherconnect.interfaces.canal.Home_CanalScreen
+import com.example.teacherconnect.interfaces.home.ConfiguracionScreen
 import com.example.teacherconnect.interfaces.home.Home
 import com.example.teacherconnect.interfaces.horario.HorarioActividadesScreen
 import com.example.teacherconnect.interfaces.horario.HorarioFormulario1Screen
@@ -48,6 +49,9 @@ fun Rutas(){
         }
         composable(Pantallas.TusCanalesConexion.name){
             ChannelScreen(navController=navController)
+        }
+        composable(Pantallas.ConfiguracionConexion.name){
+            ConfiguracionScreen(navController=navController)
         }
     }
 }

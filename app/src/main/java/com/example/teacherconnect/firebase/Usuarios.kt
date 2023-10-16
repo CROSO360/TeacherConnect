@@ -6,6 +6,7 @@ data class Usuarios(
                     val password: String="",
                     val name: String="",
                     val occupation: String="",
+                    val fotoPerfilId:String="",
                     val canales: List<String> = listOf()
 ){
     fun toMap(): MutableMap<String, Any>{
@@ -14,6 +15,7 @@ data class Usuarios(
             "password" to this.password,
             "name" to this.name,
             "occupation" to this.occupation,
+            "fotoPerfilId" to this.fotoPerfilId,
             "canales" to this.canales
         )
         this.id?.let {

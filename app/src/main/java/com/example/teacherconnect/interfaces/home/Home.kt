@@ -31,8 +31,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.teacherconnect.LocalBackgroundGradient
+import com.example.teacherconnect.LocalIsDarkMode
+import com.example.teacherconnect.LocalTextColor
 import com.example.teacherconnect.R
 import com.example.teacherconnect.interfaces.login.LoginViewModel
 import com.example.teacherconnect.navegacion.Pantallas
@@ -41,6 +43,8 @@ import kotlin.system.exitProcess
 @Composable
 fun Home(navController: NavController,viewModel: LoginViewModel =androidx.lifecycle.viewmodel.compose.viewModel()){
     GradientBackground {
+        val isDarkMode = LocalIsDarkMode.current
+        val textColors =LocalTextColor.current
         BackHandler {
             exitProcess(0)
         }
@@ -48,11 +52,11 @@ fun Home(navController: NavController,viewModel: LoginViewModel =androidx.lifecy
             modifier = Modifier.fillMaxSize()
         ) {
             Image(
-                painter = painterResource(id = R.drawable.logo_negro),
+                painter = painterResource(id = if (isDarkMode.value) R.drawable.logo_blanco else R.drawable.logo_negro),
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .size(100.dp)
+                    .size(130.dp)
                     .padding(top = 20.dp, start = 20.dp)
             )
             Image(
@@ -73,16 +77,16 @@ fun Home(navController: NavController,viewModel: LoginViewModel =androidx.lifecy
                 Text(
                     text = "¡Bienvenido a",
                     modifier = Modifier.padding(top = 100.dp),
-                    style = TextStyle(fontSize = 32.sp, color = Color.Black)
+                    style = TextStyle(fontSize = 32.sp, color = textColors.value)
                 )
                 Text(
                     text = "TeacherConnect!",
-                    style = TextStyle(fontSize = 36.sp, color = Color.Black, fontWeight = FontWeight.Bold)
+                    style = TextStyle(fontSize = 36.sp, color = textColors.value, fontWeight = FontWeight.Bold)
                 )
                 Text(
                     text = "Próxima Actividad",
                     modifier = Modifier.padding(top = 50.dp),
-                    style = TextStyle(fontSize = 20.sp, color = Color.DarkGray, fontWeight = FontWeight.Bold),
+                    style = TextStyle(fontSize = 20.sp, color = textColors.value, fontWeight = FontWeight.Bold),
                     textAlign = TextAlign.Start
                 )
                 Surface(
@@ -128,7 +132,7 @@ fun Home(navController: NavController,viewModel: LoginViewModel =androidx.lifecy
                 Text(
                     text = "Centro de Control",
                     modifier = Modifier,
-                    style = TextStyle(fontSize = 20.sp, color = Color.DarkGray, fontWeight = FontWeight.Bold),
+                    style = TextStyle(fontSize = 20.sp, color = textColors.value, fontWeight = FontWeight.Bold),
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(20.dp))
@@ -164,18 +168,20 @@ fun Home(navController: NavController,viewModel: LoginViewModel =androidx.lifecy
                     .clickable {
                         viewModel.logout()
                         navController.navigate(Pantallas.LoginConexion.name) {
-                            // Limpia la pila de navegación para que no puedas volver atrás
                             popUpTo(Pantallas.HomeConexion.name) { inclusive = true }
                         }
                     }
             )
             Image(
-                painter = painterResource(id = R.drawable.icono_soporte),
+                painter = painterResource(id = R.drawable.icon_ajustes),
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .size(60.dp)
+                    .size(80.dp)
                     .padding(bottom = 20.dp, end = 20.dp)
+                    .clickable {
+                        navController.navigate(Pantallas.ConfiguracionConexion.name)
+                    }
             )
         }
     }
@@ -185,16 +191,13 @@ fun GradientBackground(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
+    val gradientColors = LocalBackgroundGradient.current
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFFF6F7F9),
-                        Color(0xFF2D5A84)
-                    )
-                )
+                brush = Brush.verticalGradient(colors = gradientColors.value)
+
             )
     ) {
         content()

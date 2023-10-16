@@ -12,7 +12,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.Color
 import com.example.teacherconnect.navegacion.Rutas
+val LocalBackgroundGradient = compositionLocalOf { mutableStateOf(
+    listOf(
+        Color(0xFF0E0A0B),
+        Color(0xFF495765)
+    )
+)}
+val LocalTextColor = compositionLocalOf { mutableStateOf(Color.White) }
+val LocalBackgroundColor = compositionLocalOf { mutableStateOf(Color.DarkGray) }
+val LocalBorderColor = compositionLocalOf { mutableStateOf(Color.LightGray) }
+val LocalIsDarkMode = compositionLocalOf { mutableStateOf(true) }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

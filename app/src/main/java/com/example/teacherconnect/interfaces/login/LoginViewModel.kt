@@ -78,7 +78,8 @@ class LoginViewModel: ViewModel(){
             email= email,
             password= password,
             name= name,
-            occupation= occupation
+            occupation= occupation,
+            fotoPerfilId="UyOAxSF3hTxeHxt0t22L"
         ).toMap()
         val userRef = FirebaseFirestore.getInstance().collection("users").document(userId.toString())
         userRef.set(user.toMap()).addOnSuccessListener {
