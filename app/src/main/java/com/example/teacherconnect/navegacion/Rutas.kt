@@ -9,11 +9,9 @@ import com.example.teacherconnect.interfaces.canal.ChannelScreen
 import com.example.teacherconnect.interfaces.canal.Home_CanalScreen
 import com.example.teacherconnect.interfaces.home.ConfiguracionScreen
 import com.example.teacherconnect.interfaces.home.Home
-import com.example.teacherconnect.interfaces.horario.HorarioActividadesScreen
-import com.example.teacherconnect.interfaces.horario.HorarioFormulario1Screen
-import com.example.teacherconnect.interfaces.horario.HorarioFormulario2Screen
-import com.example.teacherconnect.interfaces.horario.HorarioHomeScreen
-import com.example.teacherconnect.interfaces.horario.HorarioVerScreen
+import com.example.teacherconnect.interfaces.horario.ActividadesScreen
+import com.example.teacherconnect.interfaces.horario.FormActividadesScreen
+import com.example.teacherconnect.interfaces.horario.Home_HorariosScreen
 import com.example.teacherconnect.interfaces.login.LoginScreen
 
 @Composable
@@ -26,23 +24,17 @@ fun Rutas(){
         composable(Pantallas.LoginConexion.name){
             LoginScreen(navController=navController)
         }
-        composable(Pantallas.HomeConexion.name){   
-             Home(navController=navController)
+        composable(Pantallas.HomeConexion.name){
+            Home(navController=navController)
         }
-        composable(Pantallas.Horario_homeConexion.name){
-            HorarioHomeScreen(navController=navController)
+        composable(Pantallas.Home_HorarioConexion.name){
+            Home_HorariosScreen(navController=navController)
         }
-        composable(Pantallas.Horario_formulario1Conexion.name){
-            HorarioFormulario1Screen(navController=navController)
+        composable(Pantallas.FormActividadesConexion.name){
+            FormActividadesScreen(navController=navController)
         }
-        composable(Pantallas.Horario_formulario2Conexion.name){
-            HorarioFormulario2Screen(navController=navController)
-        }
-        composable(Pantallas.Horario_verConexion.name){
-            HorarioVerScreen(navController=navController)
-        }
-        composable(Pantallas.Horario_actividadesConexion.name){
-            HorarioActividadesScreen(navController=navController)
+        composable(Pantallas.ActividadesConexion.name){
+            ActividadesScreen(navController=navController)
         }
         composable(Pantallas.Home_CanalConexion.name){
             Home_CanalScreen(navController=navController)

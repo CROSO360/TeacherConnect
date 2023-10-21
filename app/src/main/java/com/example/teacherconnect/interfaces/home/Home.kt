@@ -153,7 +153,7 @@ fun Home(navController: NavController,viewModel: LoginViewModel =androidx.lifecy
                     modifier = Modifier
                         .size(100.dp)
                         .clickable {
-                            navController.navigate(Pantallas.Horario_homeConexion.name)
+                            navController.navigate(Pantallas.Home_HorarioConexion.name)
                         }
                 )
                 Text(text = "Gestiona tu Horario", style = TextStyle(fontSize = 18.sp, color = Color.White, fontWeight = FontWeight.Bold))

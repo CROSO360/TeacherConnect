@@ -5,11 +5,9 @@ enum class Pantallas {
     LoginConexion,
     HomeConexion,
     ConfiguracionConexion,
-    Horario_homeConexion,
-    Horario_formulario1Conexion,
-    Horario_formulario2Conexion,
-    Horario_verConexion,
-    Horario_actividadesConexion,
+    Home_HorarioConexion,
+    FormActividadesConexion,
+    ActividadesConexion,
     Home_CanalConexion,
     TusCanalesConexion
 

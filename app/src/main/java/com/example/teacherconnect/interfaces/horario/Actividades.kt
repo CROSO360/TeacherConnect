@@ -54,7 +54,7 @@ fun FondoActividades(
 }
 
 @Composable
-fun HorarioActividadesScreen(navController: NavController) {
+fun ActividadesScreen(navController: NavController) {
     FondoActividades {
         Image(
             painter = painterResource(id = R.drawable.fondo2),
@@ -269,7 +269,7 @@ fun HorarioActividadesScreen(navController: NavController) {
             }
 
             Button(
-                onClick = { navController.navigate(Pantallas.Horario_homeConexion.name)},
+                onClick = { navController.navigate(Pantallas.Home_HorarioConexion.name)},
                 modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
                 colors = transparentButtoncColors
             ) {

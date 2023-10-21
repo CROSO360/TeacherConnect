@@ -447,7 +447,6 @@ fun Home_CanalScreen(navController: NavController) {
                                         imagenId = imagenId,
                                         pin = pin.value
                                     )
-
                                     canalviewmodel.createCanal(
                                         canal,
                                         onSuccess = { id ->
