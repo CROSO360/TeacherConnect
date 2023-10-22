@@ -60,14 +60,11 @@ class HorarioViewModel: ViewModel() {
         userRef.get().addOnSuccessListener { documentSnapshot ->
             val horarioId = documentSnapshot.getString("horarioId") ?: return@addOnSuccessListener
 
-            // Paso 1: Eliminar todas las actividades asociadas al horarioId
             val actividadesRef = db.collection("actividades")
             actividadesRef.whereEqualTo("horarioId", horarioId)
                 .get()
                 .addOnSuccessListener { querySnapshot ->
                     val batch = db.batch()
-
-                    // Agregar cada documento de actividad para eliminar al batch
                     for (document in querySnapshot.documents) {
                         batch.delete(document.reference)
                     }
@@ -246,6 +243,22 @@ class HorarioViewModel: ViewModel() {
             }
             .addOnFailureListener { e ->
                 Log.w("Firestore", "Error al obtener el documento", e)
+            }
+    }
+     fun obtenerActividadesPorHorarioIdYDia(horarioId: String, diaEspecifico: String) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("actividades")
+            .whereEqualTo("horarioId", horarioId)
+            .whereEqualTo("dia", diaEspecifico)
+            .get()
+            .addOnSuccessListener { documentos ->
+                val actividadesList = documentos.map { documento ->
+                    documento.toObject(Actividades::class.java)
+                }.sortedBy { it.horaEntrada }
+                _actividades.value = actividadesList
+            }
+            .addOnFailureListener { exception ->
+                Log.e("HorarioViewModel", "Error obteniendo actividades", exception)
             }
     }
 
