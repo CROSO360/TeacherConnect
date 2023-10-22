@@ -54,25 +54,48 @@ class HorarioViewModel: ViewModel() {
         }
     }
     fun eliminarHorario(userId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
+        val db = FirebaseFirestore.getInstance()
+        val userRef = db.collection("users").document(userId)
 
         userRef.get().addOnSuccessListener { documentSnapshot ->
             val horarioId = documentSnapshot.getString("horarioId") ?: return@addOnSuccessListener
 
-            val horarioRef = FirebaseFirestore.getInstance().collection("horarios").document(horarioId)
-            horarioRef.delete().addOnSuccessListener {
-                userRef.update("horarioId","").addOnSuccessListener {
-                    onSuccess()
+            // Paso 1: Eliminar todas las actividades asociadas al horarioId
+            val actividadesRef = db.collection("actividades")
+            actividadesRef.whereEqualTo("horarioId", horarioId)
+                .get()
+                .addOnSuccessListener { querySnapshot ->
+                    val batch = db.batch()
+
+                    // Agregar cada documento de actividad para eliminar al batch
+                    for (document in querySnapshot.documents) {
+                        batch.delete(document.reference)
+                    }
+
+                    // Ejecutar batch para eliminar todas las actividades
+                    batch.commit().addOnSuccessListener {
+                        // Paso 2: Eliminar el horario después de eliminar todas las actividades
+                        val horarioRef = db.collection("horarios").document(horarioId)
+                        horarioRef.delete().addOnSuccessListener {
+                            userRef.update("horarioId","").addOnSuccessListener {
+                                onSuccess()
+                            }.addOnFailureListener { exception ->
+                                onFailure(exception)
+                            }
+                        }.addOnFailureListener { exception ->
+                            onFailure(exception)
+                        }
+                    }.addOnFailureListener { exception ->
+                        onFailure(exception)
+                    }
                 }.addOnFailureListener { exception ->
                     onFailure(exception)
                 }
-            }.addOnFailureListener { exception ->
-                onFailure(exception)
-            }
         }.addOnFailureListener { exception ->
             onFailure(exception)
         }
     }
+
 
     fun obtenerHorarioId() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
@@ -154,14 +177,14 @@ class HorarioViewModel: ViewModel() {
             }
     }
     fun isHourSelectionValid(hour: String, selectedHours: List<String>, allHours: List<String>): Boolean {
-        // Si aún no hay horas seleccionadas, cualquier hora es válida
+
         if (selectedHours.isEmpty()) return true
 
         val index = allHours.indexOf(hour)
         val prevHourIndex = index - 1
         val nextHourIndex = index + 1
 
-        // Comprobar si la hora anterior o la hora siguiente están en las horas seleccionadas
+
         if ((prevHourIndex >= 0 && allHours[prevHourIndex] in selectedHours) ||
             (nextHourIndex < allHours.size && allHours[nextHourIndex] in selectedHours)) {
             return true
@@ -169,7 +192,61 @@ class HorarioViewModel: ViewModel() {
 
         return false
     }
+    private val _actividades = MutableLiveData<List<Actividades>>()
+    val actividades: LiveData<List<Actividades>> get() = _actividades
+    fun obtenerActividadesPorHorarioId(horarioId: String) {
+
+        val db = FirebaseFirestore.getInstance()
+        db.collection("actividades")
+            .whereEqualTo("horarioId", horarioId)
+            .get()
+            .addOnSuccessListener { documentos ->
+                val actividadesList = documentos.map { documento ->
+                    documento.toObject(Actividades::class.java)
+                }
+                _actividades.value = actividadesList
+            }
+            .addOnFailureListener { exception ->
+                Log.e("HorarioViewModel", "Error obteniendo actividades", exception)
+
+            }
+    }
+
+    fun eliminarActividad(actividadId: String) {
+        val db = FirebaseFirestore.getInstance()
 
 
+        db.collection("actividades").document(actividadId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val horarioId = document.getString("horarioId") ?: return@addOnSuccessListener
+
+
+                    db.collection("actividades").document(actividadId).delete()
+                        .addOnSuccessListener {
+                            Log.d("Firestore", "Documento eliminado con éxito")
+
+
+                            val horarioRef = db.collection("horarios").document(horarioId)
+
+                            horarioRef.update("actividades", FieldValue.arrayRemove(actividadId))
+                                .addOnSuccessListener {
+                                    Log.d("Firestore", "Actividad eliminada del horario con éxito")
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.w("Firestore", "Error al eliminar actividad del horario", e)
+                                }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w("Firestore", "Error al eliminar documento", e)
+                        }
+                } else {
+                    Log.w("Firestore", "El documento no existe")
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w("Firestore", "Error al obtener el documento", e)
+            }
+    }
 
 }
