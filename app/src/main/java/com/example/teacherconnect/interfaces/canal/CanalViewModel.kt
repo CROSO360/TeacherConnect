@@ -7,9 +7,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.viewModelScope
 import com.example.teacherconnect.firebase.Imagenes
 import com.example.teacherconnect.firebase.Usuarios
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class CanalViewModel : ViewModel(){
     private val firestore = FirebaseFirestore.getInstance()
@@ -70,18 +73,25 @@ class CanalViewModel : ViewModel(){
             }
         return liveData
     }
-    fun obtenerUsuarioPorId(userId: String): LiveData<Usuarios?> {
+    fun obtenerUsuarioPorId(userId: String?): LiveData<Usuarios?> {
         val liveData = MutableLiveData<Usuarios?>()
         val db = FirebaseFirestore.getInstance()
-        db.collection("users")
-            .document(userId)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val user = snapshot.toObject(Usuarios::class.java)
+
+        // Lanzar una coroutine
+        viewModelScope.launch {
+            try {
+                val snapshot = userId?.let { db.collection("users").document(it).get().await() }
+                val user = snapshot?.toObject(Usuarios::class.java)
                 liveData.value = user
+            } catch (e: Exception) {
+                val logMessage = e
+                Log.d("MiTag", logMessage.toString())
             }
+        }
+
         return liveData
     }
+
 
     fun unirUsuarioACanalPorPin(pin: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
         val db = FirebaseFirestore.getInstance()

@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.teacherconnect.PantallaCarga
 import com.example.teacherconnect.interfaces.canal.ChannelScreen
+import com.example.teacherconnect.interfaces.canal.ChatScreen
 import com.example.teacherconnect.interfaces.canal.Home_CanalScreen
 import com.example.teacherconnect.interfaces.home.ConfiguracionScreen
 import com.example.teacherconnect.interfaces.home.Home
@@ -44,6 +45,10 @@ fun Rutas(){
         }
         composable(Pantallas.ConfiguracionConexion.name){
             ConfiguracionScreen(navController=navController)
+        }
+        composable("ChatConexion/canalId={canalId}") { backStackEntry ->
+            val canalId = backStackEntry.arguments?.getString("canalId")
+            ChatScreen(navController= navController,canalId)
         }
     }
 }

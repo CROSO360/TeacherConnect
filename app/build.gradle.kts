@@ -69,7 +69,6 @@ dependencies {
     implementation("com.google.firebase:firebase-storage-ktx")
     implementation ("io.coil-kt:coil-compose:1.3.2")
 
-
     implementation("androidx.compose.material:material-icons-extended:1.3.1")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0-alpha02")
     implementation ("androidx.compose.runtime:runtime-livedata:1.5.3")

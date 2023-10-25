@@ -135,7 +135,8 @@ fun ChannelScreen(navController: NavController){
                     ListaDeCanales(
                         canales = canales,
                         imagenes = imagenes,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        navController = navController
                     )
                 }
             }
@@ -180,17 +181,17 @@ fun ChannelScreen(navController: NavController){
 }
 
 @Composable
-fun ListaDeCanales(canales: List<Canales>, imagenes: List<Imagenes>, modifier: Modifier = Modifier) {
+fun ListaDeCanales(canales: List<Canales>, imagenes: List<Imagenes>, modifier: Modifier = Modifier, navController : NavController) {
     LazyColumn(modifier = modifier.padding(8.dp)) {
         items(canales.chunked(2)) { chunkedCanales ->
             Row(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp)
             ) {
-                CanalItem(chunkedCanales[0], imagenes, Modifier.weight(1f))
+                CanalItem(chunkedCanales[0], imagenes, Modifier.weight(1f),navController = navController)
                 Spacer(Modifier.width(8.dp))
                 if (chunkedCanales.size > 1) {
-                    CanalItem(chunkedCanales[1], imagenes, Modifier.weight(1f))
+                    CanalItem(chunkedCanales[1], imagenes, Modifier.weight(1f),navController = navController)
                 }
             }
         }
@@ -200,8 +201,9 @@ fun ListaDeCanales(canales: List<Canales>, imagenes: List<Imagenes>, modifier: M
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
-fun CanalItem(canal: Canales, imagenes: List<Imagenes>, modifier: Modifier = Modifier) {
+fun CanalItem(canal: Canales, imagenes: List<Imagenes>, modifier: Modifier = Modifier, navController : NavController) {
     val imagenCanal = imagenes.find { it.id == canal.imagenId }
+    //val canalId = "FOAHon1eP8EftOCtnGQi"
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -209,6 +211,9 @@ fun CanalItem(canal: Canales, imagenes: List<Imagenes>, modifier: Modifier = Mod
             .padding(8.dp)
             .size(140.dp)
             .background(Color.Transparent, shape = MaterialTheme.shapes.medium)
+            .clickable {
+                navController.navigate("ChatConexion/canalId=${canal.id}")
+            }
     ) {
         Image(
             painter = rememberImagePainter(data = imagenCanal?.url),
