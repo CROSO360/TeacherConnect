@@ -78,11 +78,14 @@ fun GradientBackground(
 
 @Composable
 fun LoginScreen(navController: NavController,
- viewModel: LoginViewModel=androidx.lifecycle.viewmodel.compose.viewModel()) 
- {
+                viewModel: LoginViewModel=androidx.lifecycle.viewmodel.compose.viewModel())
+{
     GradientBackground {
         val showLoginForm = rememberSaveable {
             mutableStateOf(true)
+        }
+        val showRegistroExitoso = rememberSaveable {
+            mutableStateOf(false)
         }
         val email = rememberSaveable {
             mutableStateOf("")
@@ -125,10 +128,31 @@ fun LoginScreen(navController: NavController,
 
                     } else {
                         Log.d("TeacherConnect", "Creando Cuenta con $email y $password")
-                         viewModel.createUserWithEmailAndPassword(email, password, name, occupation) {
-                             showLoginForm.value = true
+                        viewModel.createUserWithEmailAndPassword(email, password, name, occupation) {
+                            showLoginForm.value = true
+                            showRegistroExitoso.value=true
                         }
                     }
+                }
+                if (showRegistroExitoso.value) {
+                    AlertDialog(
+                        onDismissRequest = {
+                            showRegistroExitoso.value = false
+                        },
+                        title = {
+                            Text(text = "Registro éxitoso")
+                        },
+                        text = {
+                            Text(text = "Inicie Sesión con sus credenciales nuevas.")
+                        },
+                        confirmButton = {
+                            Button(onClick = {
+                                showRegistroExitoso.value = false
+                            }) {
+                                Text("Cerrar")
+                            }
+                        }
+                    )
                 }
                 if (showDialog.value) {
                     AlertDialog(
@@ -174,7 +198,7 @@ fun LoginScreen(navController: NavController,
                         color = Color.Cyan
                     )
                 }
-                  Spacer(modifier = Modifier.height(50.dp))
+                Spacer(modifier = Modifier.height(50.dp))
             }
         }
     }
@@ -188,14 +212,14 @@ fun UserForm(
     onDone: (String, String, String, String) -> Unit = { email, password, name, occupation -> }
 ) {
 
-    val name = rememberSaveable {   
-         mutableStateOf("")
+    val name = rememberSaveable {
+        mutableStateOf("")
     }
     val occupation = rememberSaveable {
-    mutableStateOf("Profesor")
+        mutableStateOf("Profesor")
     }
     val passwordVisible = rememberSaveable {
-        mutableStateOf(false) 
+        mutableStateOf(false)
     }
     val valido = remember(email.value, password.value) {
         email.value.trim().isNotEmpty() &&
@@ -248,13 +272,13 @@ fun UserForm(
         if (showLoginForm) {
             SubmitButton(textId = "Login", inputValido = valido) {
                 onDone(email.value.trim(), password.value.trim(),
-                name.value.trim(),occupation.value.trim())
+                    name.value.trim(),occupation.value.trim())
                 keyboardController?.hide()
             }
         } else {
             SubmitButton(textId = "Crear cuenta", inputValido = valido) {
                 onDone(email.value.trim(), password.value.trim()
-                ,name.value.trim(),occupation.value.trim())
+                    ,name.value.trim(),occupation.value.trim())
                 keyboardController?.hide()
                 email.value = ""
                 password.value = ""

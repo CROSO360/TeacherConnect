@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -33,7 +32,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,7 +55,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -67,23 +64,19 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.lifecycle.Observer
 import coil.compose.rememberImagePainter
 import com.example.teacherconnect.LocalBackgroundColor
 import com.example.teacherconnect.LocalBorderColor
-import com.example.teacherconnect.LocalIsDarkMode
 import com.example.teacherconnect.LocalTextColor
 import com.example.teacherconnect.firebase.Canales
 import com.example.teacherconnect.firebase.Imagenes
 import com.example.teacherconnect.navegacion.Pantallas
-import kotlin.math.log
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ChatScreen(navController: NavController, canalId: String?) {
 
 
-    val isDarkMode = LocalIsDarkMode.current
     val textColors = LocalTextColor.current
     val backgroundColor = LocalBackgroundColor.current
     val borderColor = LocalBorderColor.current
@@ -91,6 +84,7 @@ fun ChatScreen(navController: NavController, canalId: String?) {
     val showDialogFotoPerfil = remember { mutableStateOf(false) }
     val showDialogNombre = remember { mutableStateOf(false) }
     var showDialogConfirmDelete by remember { mutableStateOf(false) }
+    var showDialogConfirmExit by remember { mutableStateOf(false) }
 
     val textColor = LocalTextColor.current
 
@@ -290,7 +284,46 @@ fun ChatScreen(navController: NavController, canalId: String?) {
 
                             }
                             Spacer(modifier = Modifier.height(15.dp))
+                            Text(text = "Pin del Canal",
+                                fontWeight = FontWeight.Normal,
+                                color = textColor.value)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        color = backgroundColor.value,
+                                        shape = RoundedCornerShape(10.dp)
+                                    )
+                                    .border(
+                                        2.dp,
+                                        color = borderColor.value,
+                                        shape = RoundedCornerShape(10.dp)
+                                    )
+                                    .height(80.dp)
+                                    .padding(end = 16.dp, top = 8.dp, bottom = 8.dp),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Spacer(modifier = Modifier.width(40.dp))
+                                canal?.let {
+                                    Text(
+                                        text = it.pin,
+                                        style = TextStyle(
+                                            fontSize = 15.sp,
+                                            color = textColor.value
+                                        )
+                                    )
+                                }
+                                Spacer(modifier = Modifier.weight(1f))
+                                Image(
+                                    painter = rememberImagePainter(data = R.drawable.icon_editarblock),
+                                    contentDescription = "",
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                )
 
+                            }
+                            Spacer(modifier = Modifier.height(15.dp))
                             Button(onClick = {
                                 showDialogConfirmDelete = true
                             }) {
@@ -310,6 +343,11 @@ fun ChatScreen(navController: NavController, canalId: String?) {
 
                         Spacer(modifier = Modifier.height(15.dp))
 
+                        Button(onClick = {
+                            showDialogConfirmExit = true
+                        }) {
+                            Text("Salir del canal")
+                        }
 
                     }
 
@@ -352,7 +390,6 @@ fun ChatScreen(navController: NavController, canalId: String?) {
                     )
                 },
                 text = {
-                    // Suponiendo que tienes un viewModel que contiene tu método obtenerUsuariosDelCanal()
                     val usuarios = chatViewModel.obtenerUsuariosDelCanal(canalId).observeAsState(initial = emptyList())
 
                     LazyColumn {
@@ -360,7 +397,8 @@ fun ChatScreen(navController: NavController, canalId: String?) {
                         profesor?.let {
                             item {
                                 Text(text = "Profesor:", style = TextStyle(fontWeight = FontWeight.Bold, color = textColor.value))
-                                Text(text = it.name, color = textColor.value) // Asumiendo que el objeto 'usuario' tiene un atributo 'name'
+                                Text(text = it.name, color = textColor.value)
+                                Spacer(modifier = Modifier.height(15.dp))
                             }
                         }
 
@@ -370,7 +408,7 @@ fun ChatScreen(navController: NavController, canalId: String?) {
 
                         val estudiantes = usuarios.value.filter { it.occupation.toString() == "Estudiante" }
                         items(estudiantes) { estudiante ->
-                            Text(text = estudiante.name, color = textColor.value) // Asumiendo que el objeto 'estudiante' tiene un atributo 'name'
+                            Text(text = estudiante.name, color = textColor.value)
                         }
                     }
                 },
@@ -406,7 +444,6 @@ fun ChatScreen(navController: NavController, canalId: String?) {
                 confirmButton = {
                     Button(onClick = {
 
-                        // Llama a la función de eliminar canal
                         chatViewModel.eliminarCanal(canalId,
                             onSuccess = {
                                 navController.navigate(Pantallas.TusCanalesConexion.name)
@@ -426,6 +463,41 @@ fun ChatScreen(navController: NavController, canalId: String?) {
                 dismissButton = {
                     Button(onClick = {
                         showDialogConfirmDelete = false
+                    }) {
+                        Text("Cancelar")
+                    }
+                }
+            )
+        }
+        if (showDialogConfirmExit) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDialogConfirmExit = false
+                },
+                title = { Text("Confirmación") },
+                text = { Text("¿Estás seguro de que quieres salir de este canal?") },
+                confirmButton = {
+                    Button(onClick = {
+
+                        chatViewModel.exitCanal(canalId,
+                            onSuccess = {
+                                navController.navigate(Pantallas.TusCanalesConexion.name)
+                                showDialogConfirmExit = false
+                                showDialogOptions.value = false
+                            },
+                            onFailure = { exception ->
+                                showDialogConfirmExit = false
+                            }
+                        )
+
+                        //
+                    }) {
+                        Text("Confirmar")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = {
+                        showDialogConfirmExit = false
                     }) {
                         Text("Cancelar")
                     }
@@ -576,13 +648,13 @@ fun ChatScreen(navController: NavController, canalId: String?) {
                         }
                         Button(onClick = {
 
-                                val nuevoNombre = nameChange.value
-                                nuevoNombre.let {
-                                    chatViewModel.actualizarNombre(it, canalId)
-                                }
-                                showDialogOptions.value = false
-                                showDialogNombre.value = false
-                                nameChange.value=""
+                            val nuevoNombre = nameChange.value
+                            nuevoNombre.let {
+                                chatViewModel.actualizarNombre(it, canalId)
+                            }
+                            showDialogOptions.value = false
+                            showDialogNombre.value = false
+                            nameChange.value=""
                         }) {
                             Text("Guardar")
                         }

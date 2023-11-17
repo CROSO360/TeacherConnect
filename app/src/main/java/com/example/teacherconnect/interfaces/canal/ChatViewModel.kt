@@ -25,9 +25,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class ChatViewModel : ViewModel() {
-
-    //
-
     val canalViewModel = CanalViewModel()
 
     fun obtenerCanalPorId(canaId: String?): LiveData<Canales?> {
@@ -91,10 +88,8 @@ class ChatViewModel : ViewModel() {
         db.collection("mensajes")
             .add(nuevoMensaje.toMap())
             .addOnSuccessListener {
-                // Aquí puedes añadir lógica adicional si se envió el mensaje exitosamente
             }
             .addOnFailureListener { e ->
-                // Aquí puedes manejar el error si hubo un problema al enviar el mensaje
             }
     }
 
@@ -164,16 +159,13 @@ class ChatViewModel : ViewModel() {
                 val profesorId = document.getString("profesorId")
                 val estudiantes = document.get("estudiantes") as? List<String> ?: listOf()
 
-                // Crear una lista para guardar todos los Usuarios
                 val usuariosList = mutableListOf<Usuarios>()
 
-                // Obtener el profesor
                 profesorId?.let {
                     canalViewModel.obtenerUsuarioPorId(it).observeForever { profesor ->
                         profesor?.let {
                             usuariosList.add(it)
 
-                            // Verificar si hemos terminado de agregar todos los usuarios
                             if (usuariosList.size == estudiantes.size + 1) {
                                 liveData.value = usuariosList
                             }
@@ -181,13 +173,11 @@ class ChatViewModel : ViewModel() {
                     }
                 }
 
-                // Obtener estudiantes
                 for (estudianteId in estudiantes) {
                     canalViewModel.obtenerUsuarioPorId(estudianteId).observeForever { estudiante ->
                         estudiante?.let {
                             usuariosList.add(it)
 
-                            // Verificar si hemos terminado de agregar todos los usuarios
                             if (usuariosList.size == estudiantes.size + 1) {
                                 liveData.value = usuariosList
                             }
@@ -251,6 +241,27 @@ class ChatViewModel : ViewModel() {
                 onFailure(exception)
             }
         }
+    }
+    fun exitCanal(canalId: String?, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val usuarioId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        val usuarioRef = db.collection("users").document(usuarioId)
+        usuarioRef.update("canales", FieldValue.arrayRemove(canalId))
+            .addOnSuccessListener {
+
+                val canalRef = canalId?.let { db.collection("canales").document(it) }
+                canalRef?.update("estudiantes", FieldValue.arrayRemove(usuarioId))
+                    ?.addOnSuccessListener {
+                        onSuccess()
+                    }
+                    ?.addOnFailureListener { exception ->
+                        onFailure(exception)
+                    }
+            }
+            .addOnFailureListener { exception ->
+                onFailure(exception)
+            }
     }
 
 

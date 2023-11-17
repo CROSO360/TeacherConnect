@@ -44,7 +44,6 @@ import androidx.navigation.NavController
 import com.example.teacherconnect.LocalBackgroundColor
 import com.example.teacherconnect.LocalBackgroundGradient
 import com.example.teacherconnect.LocalBorderColor
-import com.example.teacherconnect.LocalIsDarkMode
 import com.example.teacherconnect.LocalTextColor
 import com.example.teacherconnect.R
 import com.example.teacherconnect.firebase.Horarios
@@ -74,12 +73,12 @@ fun Home_HorariosScreen(navController: NavController) {
     val auth = FirebaseAuth.getInstance()
     val horarioviewmodel= HorarioViewModel()
     val showDialogCrear = rememberSaveable { mutableStateOf(false) }
+    val showDialogEliminar = rememberSaveable { mutableStateOf(false) }
     val showDialogAviso = rememberSaveable { mutableStateOf(false) }
     val nombreHorario = rememberSaveable { mutableStateOf("") }
     val textColors = LocalTextColor.current
     val backgroundColor = LocalBackgroundColor.current
     val borderColor = LocalBorderColor.current
-    val isDarkMode = LocalIsDarkMode.current
     val tieneHorario = remember { mutableStateOf(true) }
 
     FondoHome {
@@ -118,19 +117,12 @@ fun Home_HorariosScreen(navController: NavController) {
                     )
                 }
             }else {
+
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.clickable {
-                        val usuarioId = auth.currentUser?.uid ?: return@clickable
-                        horarioviewmodel.eliminarHorario(
-                            usuarioId,
-                            onSuccess = {
-                                tieneHorario.value = false
-                            },
-                            onFailure = { exception ->
-                                Log.d("TeacherConnect", "Error eliminando el horario: ${exception}")
-                            }
-                        ) }
+                        showDialogEliminar.value = true
+                    }
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.icon_eliminarhorario),
@@ -372,6 +364,63 @@ fun Home_HorariosScreen(navController: NavController) {
                 .border(2.dp, color=borderColor.value, RoundedCornerShape(8.dp))
         )
     }
+    if (showDialogEliminar.value){
+        AlertDialog(
+            onDismissRequest = {
+                showDialogEliminar.value = false
+            },
+            title = { Text(
+                style = TextStyle(
+                    fontSize = 22.sp,
+                    color = textColors.value
+                ),
+                text = "Confirmación") },
+            text = {
+                Text(
+                    style = TextStyle(
+                        fontSize = 18.sp,
+                        color = textColors.value,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    text = "¿Esta seguro de eliminar su horario?")
+            },
+            confirmButton = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(onClick = {
+                        showDialogEliminar.value = false
+                    }) {
+                        Text("Cancelar")
+                    }
+                    Button(onClick = {
+                        showDialogEliminar.value = false
+                        val usuarioId = auth.currentUser?.uid ?: return@Button
+                        horarioviewmodel.eliminarHorario(
+                            usuarioId,
+                            onSuccess = {
+                                tieneHorario.value = false
+                            },
+                            onFailure = { exception ->
+                                Log.d("TeacherConnect", "Error eliminando el horario: ${exception}")
+                            }
+                        )
+                    }) {
+                        Text("Eliminar")
+                    }
+                }
+            },
+            containerColor=backgroundColor.value,
+            shape = RoundedCornerShape(8.dp),
+            modifier=Modifier
+                .border(2.dp, color=borderColor.value, RoundedCornerShape(8.dp))
+        )
+    }
+
 }
 
 
