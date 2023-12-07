@@ -33,15 +33,12 @@ class LoginViewModel: ViewModel(){
 
                         when (exception) {
                             is FirebaseAuthInvalidUserException -> {
-                                // El correo electrónico no corresponde a ninguna cuenta
                                 onResult(SignInResult.EmailError)
                             }
                             is FirebaseAuthInvalidCredentialsException -> {
-                                // Contraseña incorrecta para el correo electrónico dado
                                 onResult(SignInResult.PasswordError)
                             }
                             else -> {
-                                // Manejar otros errores
                                 onResult(SignInResult.UnknownError)
                             }
                         }

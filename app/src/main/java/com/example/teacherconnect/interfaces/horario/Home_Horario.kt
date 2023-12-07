@@ -44,6 +44,7 @@ import androidx.navigation.NavController
 import com.example.teacherconnect.LocalBackgroundColor
 import com.example.teacherconnect.LocalBackgroundGradient
 import com.example.teacherconnect.LocalBorderColor
+import com.example.teacherconnect.LocalIsDarkMode
 import com.example.teacherconnect.LocalTextColor
 import com.example.teacherconnect.R
 import com.example.teacherconnect.firebase.Horarios
@@ -71,6 +72,7 @@ fun FondoHome(
 @Composable
 fun Home_HorariosScreen(navController: NavController) {
     val auth = FirebaseAuth.getInstance()
+    val isDarkMode = LocalIsDarkMode.current
     val horarioviewmodel= HorarioViewModel()
     val showDialogCrear = rememberSaveable { mutableStateOf(false) }
     val showDialogEliminar = rememberSaveable { mutableStateOf(false) }
@@ -143,7 +145,7 @@ fun Home_HorariosScreen(navController: NavController) {
             }
         }
         Image(
-            painter = painterResource(id = R.drawable.icon),
+            painter = painterResource(id = if (isDarkMode.value) R.drawable.logo_blanco else R.drawable.logo_negro),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -382,7 +384,7 @@ fun Home_HorariosScreen(navController: NavController) {
                         color = textColors.value,
                         fontWeight = FontWeight.Bold
                     ),
-                    text = "¿Esta seguro de eliminar su horario?")
+                    text = "¿Está seguro de eliminar su horario?")
             },
             confirmButton = {
                 Row(

@@ -27,6 +27,16 @@ class HomeViewModel : ViewModel() {
             contarCanalesDelUsuario(userId)
         }
     }
+    fun NotificacionesCheck(userId: String, onCheckComplete: (Boolean) -> Unit) {
+        val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
+
+        userRef.get().addOnSuccessListener { documentSnapshot ->
+            val notificaciones = documentSnapshot.get("notificaciones") as? List<*>
+            onCheckComplete(notificaciones != null && notificaciones.isNotEmpty())
+        }.addOnFailureListener { exception ->
+            Log.d("AppLog", "Error al verificar notificaciones: ${exception.message}")
+        }
+    }
 
     private fun fetchUserData() {
         val userId = auth.currentUser?.uid ?: return

@@ -735,7 +735,10 @@ fun ConfiguracionScreen(navController: NavController){
                                         } else {
                                             showError.value = true
                                         }
-                                    }) {
+                                    },
+                                            enabled = nameChange.value.isNotEmpty() && passwordvalidate.value.isNotEmpty()
+
+                                    ) {
                                         Text("Guardar")
                                     }
 
@@ -780,24 +783,37 @@ fun ConfiguracionScreen(navController: NavController){
                                         Text(text = "La contraseña es incorrecta", color = Color.Red)
                                     }
                                     Spacer(modifier = Modifier.height(15.dp))
+                                    val passwordLengthError = rememberSaveable { mutableStateOf(false) }
+                                    val passwordMatchError = rememberSaveable { mutableStateOf(false) }
+
                                     if(showInputs.value) {
                                         TextField(
                                             value = newpassword1.value,
-                                            onValueChange = { newpassword1.value = it },
-                                            label = { Text("Contraseña Nueva") }
+                                            onValueChange = {
+                                                newpassword1.value = it
+                                                passwordLengthError.value = it.length < 6
+                                                passwordMatchError.value = newpassword2.value.isNotEmpty() && newpassword2.value != it
+                                            },
+                                            label = { Text("Contraseña Nueva") },
+                                            isError = passwordLengthError.value
                                         )
                                         Spacer(modifier = Modifier.height(15.dp))
                                         TextField(
                                             value = newpassword2.value,
-                                            onValueChange = { newpassword2.value = it },
-                                            label = { Text("Repita la contraseña nueva") }
+                                            onValueChange = {
+                                                newpassword2.value = it
+                                                passwordLengthError.value = it.length < 6
+                                                passwordMatchError.value = newpassword1.value.isNotEmpty() && newpassword1.value != it
+                                            },
+                                            label = { Text("Repita la contraseña nueva") },
+                                            isError = passwordLengthError.value || passwordMatchError.value
                                         )
-                                        if(showErrorInputs.value){
+                                        if(passwordLengthError.value) {
+                                            Text(text = "La contraseña debe tener 6 o más caracteres.", color = Color.Red)
+                                        } else if(showErrorInputs.value && passwordMatchError.value) {
                                             Text(text = "Las contraseñas no coinciden", color = Color.Red)
-
                                         }
-                                    }
-                                }
+                                    }                                }
                             },
                             confirmButton = {
                                 Row(
@@ -812,26 +828,29 @@ fun ConfiguracionScreen(navController: NavController){
                                         newpassword1.value=""
                                         newpassword2.value=""
                                         passwordvalidate.value=""
+                                        showInputs.value=false
                                     }) {
                                         Text("Regresar")
                                     }
-                                    Button(onClick = {
-                                        if (newpassword1.value == newpassword2.value) {
-                                            val nuevapassword = newpassword1.value
-                                            nuevapassword.let {
-                                                homeviewModel.actualizarPassword(it)
-                                            }
+                                    // Estado para manejar la habilitación del botón de guardar
+                                    val isSaveEnabled = remember(newpassword1.value, newpassword2.value, passwordvalidate.value) {
+                                        newpassword1.value.length >= 6 &&
+                                                newpassword2.value == newpassword1.value &&
+                                                passwordvalidate.value.length >= 6
+                                    }
+
+                                    Button(
+                                        onClick = {
+                                            homeviewModel.actualizarPassword(newpassword1.value)
                                             showDialogSeguridad.value = false
                                             showErrorInputs.value = false
-                                            showInputs.value=false
-                                            newpassword1.value=""
-                                            newpassword2.value=""
-                                            passwordvalidate.value=""
-                                        } else {
-                                            showErrorInputs.value = true
-                                            newpassword2.value=""
-                                        }
-                                    }) {
+                                            showInputs.value = false
+                                            newpassword1.value = ""
+                                            newpassword2.value = ""
+                                            passwordvalidate.value = ""
+                                        },
+                                        enabled = isSaveEnabled
+                                    ) {
                                         Text("Guardar")
                                     }
 

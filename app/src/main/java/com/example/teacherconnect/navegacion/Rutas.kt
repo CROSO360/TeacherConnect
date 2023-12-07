@@ -10,6 +10,7 @@ import com.example.teacherconnect.interfaces.canal.ChatScreen
 import com.example.teacherconnect.interfaces.canal.Home_CanalScreen
 import com.example.teacherconnect.interfaces.home.ConfiguracionScreen
 import com.example.teacherconnect.interfaces.home.Home
+import com.example.teacherconnect.interfaces.home.Notificaciones
 import com.example.teacherconnect.interfaces.horario.ActividadesScreen
 import com.example.teacherconnect.interfaces.horario.FormActividadesScreen
 import com.example.teacherconnect.interfaces.horario.Home_HorariosScreen
@@ -49,6 +50,9 @@ fun Rutas(){
         composable("ChatConexion/canalId={canalId}") { backStackEntry ->
             val canalId = backStackEntry.arguments?.getString("canalId")
             ChatScreen(navController= navController,canalId)
+        }
+        composable(Pantallas.NotificacionesConexion.name){
+            Notificaciones(navController=navController)
         }
     }
 }

@@ -8,7 +8,10 @@ data class Usuarios(
                     val occupation: String="",
                     val fotoPerfilId:String="",
                     val horarioId: String="",
-                    val canales: List<String> = listOf()
+                    val canales: List<String> = listOf(),
+                    val notificaciones: List<String> = listOf(),
+                    val notificacionesleidas: List<String> = listOf()
+
 ){
     fun toMap(): MutableMap<String, Any>{
         val result = mutableMapOf(
@@ -18,7 +21,9 @@ data class Usuarios(
             "occupation" to this.occupation,
             "fotoPerfilId" to this.fotoPerfilId,
             "horarioId" to this.horarioId,
-            "canales" to this.canales
+            "canales" to this.canales,
+            "notificaciones" to this.notificaciones,
+            "notificacionesleidas" to this.notificacionesleidas
         )
         this.id?.let {
             result["id"] = it

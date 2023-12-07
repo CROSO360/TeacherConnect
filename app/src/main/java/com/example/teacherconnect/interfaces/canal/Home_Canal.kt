@@ -46,6 +46,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material3.Icon
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import coil.compose.rememberImagePainter
@@ -59,6 +60,9 @@ import com.example.teacherconnect.LocalBorderColor
 import com.example.teacherconnect.LocalIsDarkMode
 import com.example.teacherconnect.LocalTextColor
 import com.example.teacherconnect.firebase.Usuarios
+import com.example.teacherconnect.interfaces.home.HomeViewModel
+import com.example.teacherconnect.interfaces.horario.HorarioViewModel
+
 @Composable
 fun BackGroundGradient(
     modifier: Modifier = Modifier,
@@ -96,8 +100,16 @@ fun Home_CanalScreen(navController: NavController) {
     val textColors = LocalTextColor.current
     val backgroundColor = LocalBackgroundColor.current
     val borderColor = LocalBorderColor.current
-    BackGroundGradient {
+    val homeViewModel= HomeViewModel()
+    val tieneNotificaciones = remember { mutableStateOf(true) }
 
+    BackGroundGradient {
+        LaunchedEffect(key1 = Unit) {
+            val usuarioId = auth.currentUser?.uid ?: return@LaunchedEffect
+            homeViewModel.NotificacionesCheck(usuarioId) { tiene ->
+                tieneNotificaciones.value = tiene
+            }
+        }
 
         Box(
             modifier = Modifier
@@ -169,12 +181,14 @@ fun Home_CanalScreen(navController: NavController) {
                     Spacer(modifier = Modifier.width(60.dp))
 
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
                         Image(
-                            painter = painterResource(id = R.drawable.icono_avisos),
+                            painter = painterResource(id =   if (!tieneNotificaciones.value) R.drawable.sinnotificaciones else R.drawable.nuevanotificacion),
                             contentDescription = null,
                             modifier = Modifier
                                 .size(130.dp)
                                 .clickable {
+                                    navController.navigate(Pantallas.NotificacionesConexion.name)
                                 }
                         )
                         Text(

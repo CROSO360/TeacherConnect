@@ -397,10 +397,13 @@ fun ChatScreen(navController: NavController, canalId: String?) {
 
                         Spacer(modifier = Modifier.height(15.dp))
 
-                        Button(onClick = {
-                            showDialogConfirmExit = true
-                        }) {
-                            Text("Salir del canal")
+                        if(sape?.occupation.toString() == "Estudiante") {
+
+                            Button(onClick = {
+                                showDialogConfirmExit = true
+                            }) {
+                                Text("Salir del canal")
+                            }
                         }
 
                     }
@@ -841,7 +844,19 @@ fun ChatScreen(navController: NavController, canalId: String?) {
 
                 IconButton(onClick = {
                     // Guardar el mensaje en Firebase
-                    chatViewModel.EnviarMensaje(mensajeEnviado, canalId, user?.value?.id)
+                    val chatViewModel = ChatViewModel()
+
+                    chatViewModel.EnviarMensaje(
+                        mensajeEnviado,
+                        canalId,
+                        user?.value?.id,
+                        onSuccess = { id ->
+                            Log.d("TeacherConnect", "Mensaje enviado con éxito, ID: $id")
+                        },
+                        onFailure = {
+                            Log.d("TeacherConnect", "Error al enviar mensaje: ${it.message}")
+                        }
+                    )
                     mensajeEnviado = "" // resetea el campo después de enviar
                 }) {
                     Icon(Icons.Default.Send, contentDescription = "Enviar mensaje")

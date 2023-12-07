@@ -7,7 +7,7 @@ data class Mensajes(
     val canalID: String = "",
     val usuarioID: String = "",
     val contenido: String = "",
-    val fecha: Timestamp? = null, // Corrección aquí
+    val fecha: Timestamp? = null,
     val tipo: String = "",
     val imagenID: String? = null
 ) {
@@ -21,7 +21,7 @@ data class Mensajes(
         )
 
         this.id?.let {
-            result["id"] = it as Any?
+            result["id"] = it
         }
 
         this.imagenID?.let {

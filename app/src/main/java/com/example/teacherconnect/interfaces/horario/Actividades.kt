@@ -135,7 +135,7 @@ fun ActividadesScreen(navController: NavController) {
                     style = TextStyle(
                         fontWeight = FontWeight.Bold,
                         fontSize = 24.sp,
-                        color = Color(0xFF1FE7D2)
+                        color = if(!isDarkMode.value) Color.White else Color(0xFF1FE7D2)
                     ),
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)

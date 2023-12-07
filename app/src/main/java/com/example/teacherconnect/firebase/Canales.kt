@@ -7,6 +7,7 @@ data class Canales(
     val imagenId:String="",
     val pin:String="",
     val estudiantes: List<String> = listOf(),
+    val mensajes: List<String> = listOf(),
     val descripcion: String=""
 ) {
     fun toMap(): Map<String, Any> {
@@ -16,8 +17,8 @@ data class Canales(
             "imagenId" to this.imagenId,
             "pin" to this.pin,
             "estudiantes" to this.estudiantes,
-            "descripcion" to this.descripcion
-
+            "descripcion" to this.descripcion,
+            "mensajes" to this.mensajes
         )
         this.id?.let {
             result["id"] = it

@@ -9,6 +9,6 @@ enum class Pantallas {
     FormActividadesConexion,
     ActividadesConexion,
     Home_CanalConexion,
-    TusCanalesConexion
-
+    TusCanalesConexion,
+    NotificacionesConexion
 }

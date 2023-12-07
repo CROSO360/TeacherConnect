@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,11 +21,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +43,7 @@ import com.example.teacherconnect.LocalTextColor
 import com.example.teacherconnect.R
 import com.example.teacherconnect.interfaces.login.LoginViewModel
 import com.example.teacherconnect.navegacion.Pantallas
+import com.google.firebase.auth.FirebaseAuth
 import kotlin.system.exitProcess
 
 @Composable
@@ -45,8 +51,18 @@ fun Home(navController: NavController,viewModel: LoginViewModel =androidx.lifecy
     GradientBackground {
         val isDarkMode = LocalIsDarkMode.current
         val textColors =LocalTextColor.current
+        val homeViewModel= HomeViewModel()
+        val tieneNotificaciones = remember { mutableStateOf(true) }
+        val auth = FirebaseAuth.getInstance()
+
         BackHandler {
             exitProcess(0)
+        }
+        LaunchedEffect(key1 = Unit) {
+            val usuarioId = auth.currentUser?.uid ?: return@LaunchedEffect
+            homeViewModel.NotificacionesCheck(usuarioId) { tiene ->
+                tieneNotificaciones.value = tiene
+            }
         }
         Box(
             modifier = Modifier.fillMaxSize()
@@ -59,21 +75,15 @@ fun Home(navController: NavController,viewModel: LoginViewModel =androidx.lifecy
                     .size(130.dp)
                     .padding(top = 20.dp, start = 20.dp)
             )
-            Image(
-                painter = painterResource(id = R.drawable.icono_avisos),
-                contentDescription = null,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .size(100.dp)
-                    .padding(top = 20.dp, end = 20.dp)
-            )
+            val padding = 20.dp
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(horizontal = padding)
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
-            ) {
+            )  {
                 Text(
                     text = "¡Bienvenido a",
                     modifier = Modifier.padding(top = 100.dp),
@@ -85,14 +95,14 @@ fun Home(navController: NavController,viewModel: LoginViewModel =androidx.lifecy
                 )
                 Text(
                     text = "Próxima Actividad",
-                    modifier = Modifier.padding(top = 50.dp),
+                    modifier = Modifier.padding(top = 50.dp, bottom = 10.dp),
                     style = TextStyle(fontSize = 20.sp, color = textColors.value, fontWeight = FontWeight.Bold),
                     textAlign = TextAlign.Start
                 )
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 40.dp, end = 40.dp, bottom = 30.dp, top = 10.dp)
+                        .aspectRatio(5f)
                         .clip(RoundedCornerShape(12.dp)),
                     color = Color.White
                 ) {
@@ -131,7 +141,7 @@ fun Home(navController: NavController,viewModel: LoginViewModel =androidx.lifecy
                 }
                 Text(
                     text = "Centro de Control",
-                    modifier = Modifier,
+                    modifier = Modifier.padding(top = 25.dp),
                     style = TextStyle(fontSize = 20.sp, color = textColors.value, fontWeight = FontWeight.Bold),
                     textAlign = TextAlign.Start
                 )
@@ -181,6 +191,17 @@ fun Home(navController: NavController,viewModel: LoginViewModel =androidx.lifecy
                     .padding(bottom = 20.dp, end = 20.dp)
                     .clickable {
                         navController.navigate(Pantallas.ConfiguracionConexion.name)
+                    }
+            )
+            Image(
+                painter = painterResource(id = if (!tieneNotificaciones.value) R.drawable.sinnotificaciones else R.drawable.nuevanotificacion),
+                contentDescription = "Notificaciones",
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .size(120.dp)
+                    .padding(top = 30.dp, end = 20.dp)
+                    .clickable {
+                        navController.navigate(Pantallas.NotificacionesConexion.name)
                     }
             )
         }

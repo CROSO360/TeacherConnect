@@ -1,5 +1,6 @@
 package com.example.teacherconnect.interfaces.canal
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -79,8 +80,6 @@ fun ChannelScreen(navController: NavController){
         val textColors = LocalTextColor.current
         val backgroundColor = LocalBackgroundColor.current
         val borderColor = LocalBorderColor.current
-        showDialog.value = false
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -118,6 +117,9 @@ fun ChannelScreen(navController: NavController){
                 canalViewModel.obtenerImagenesEmoji()
             }
             val canales by canalViewModel.canales.observeAsState(listOf())
+            LaunchedEffect(key1 = canales) {
+                showDialog.value = canales.isEmpty()
+            }
             Column(
                 modifier = Modifier
                     .fillMaxSize(),
@@ -130,7 +132,7 @@ fun ChannelScreen(navController: NavController){
                     modifier = Modifier.padding(top = 115.dp, start = 40.dp).align(Alignment.Start)
                 )
                 if (canales.isEmpty()) {
-                    showDialog.value = true
+                    Log.d("canales","no hay canales")
                 } else {
                     ListaDeCanales(
                         canales = canales,
@@ -138,6 +140,8 @@ fun ChannelScreen(navController: NavController){
                         modifier = Modifier.weight(1f),
                         navController = navController
                     )
+                    Log.d("canales","si hay canales")
+
                 }
             }
             if (showDialog.value) {
@@ -203,7 +207,6 @@ fun ListaDeCanales(canales: List<Canales>, imagenes: List<Imagenes>, modifier: M
 @Composable
 fun CanalItem(canal: Canales, imagenes: List<Imagenes>, modifier: Modifier = Modifier, navController : NavController) {
     val imagenCanal = imagenes.find { it.id == canal.imagenId }
-    //val canalId = "FOAHon1eP8EftOCtnGQi"
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
