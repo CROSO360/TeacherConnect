@@ -43,7 +43,7 @@ class ChatViewModel : ViewModel() {
     }
 
 
-    private val _mensajes = MutableLiveData<List<Mensajes>>()
+    private val _mensajes = MutableLiveData<List<Mensajes>>(emptyList())
 
     val mensajes: LiveData<List<Mensajes>> = _mensajes
 
@@ -146,6 +146,19 @@ class ChatViewModel : ViewModel() {
                 }
                 .addOnFailureListener { e ->
                     Log.e("actualizarNombre", "Error al actualizar el nombre en Firestore: ${e.message}")
+                }
+        }
+    }
+
+    fun actualizarDescripcion(nuevoNombre: String, canalId: String?) {
+        if (canalId != null) {
+            db.collection("canales").document(canalId).update("descripcion", nuevoNombre)
+                .addOnSuccessListener {
+                    Log.d("actualizardesc", "desc actualizado en Firestore")
+                    obtenerCanalPorId(canalId)
+                }
+                .addOnFailureListener { e ->
+                    Log.e("actualizardesc", "Error al actualizar la desc en Firestore: ${e.message}")
                 }
         }
     }

@@ -445,7 +445,8 @@ fun Home_CanalScreen(navController: NavController) {
                                         nombreCanal = canalName.value,
                                         profesorId = usuarioId,
                                         imagenId = imagenId,
-                                        pin = pin.value
+                                        pin = pin.value,
+                                        descripcion="Canal ${canalName.value}"
                                     )
                                     canalviewmodel.createCanal(
                                         canal,

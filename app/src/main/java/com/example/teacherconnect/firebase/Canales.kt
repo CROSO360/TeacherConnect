@@ -6,7 +6,8 @@ data class Canales(
     val profesorId: String="",
     val imagenId:String="",
     val pin:String="",
-    val estudiantes: List<String> = listOf()
+    val estudiantes: List<String> = listOf(),
+    val descripcion: String=""
 ) {
     fun toMap(): Map<String, Any> {
         val result = mutableMapOf(
@@ -14,7 +15,8 @@ data class Canales(
             "profesorId" to this.profesorId,
             "imagenId" to this.imagenId,
             "pin" to this.pin,
-            "estudiantes" to this.estudiantes
+            "estudiantes" to this.estudiantes,
+            "descripcion" to this.descripcion
 
         )
         this.id?.let {

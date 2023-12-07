@@ -86,6 +86,8 @@ fun ChatScreen(navController: NavController, canalId: String?) {
     var showDialogConfirmDelete by remember { mutableStateOf(false) }
     var showDialogConfirmExit by remember { mutableStateOf(false) }
 
+    var showDialogDescripcion = remember { mutableStateOf(false)}
+
     val textColor = LocalTextColor.current
 
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -96,6 +98,7 @@ fun ChatScreen(navController: NavController, canalId: String?) {
 
     val canalViewModel = CanalViewModel()
 
+    val chatViewModel = ChatViewModel()
 
     val user = FirebaseAuth.getInstance().currentUser?.uid?.let { canalViewModel.obtenerUsuarioPorId(it) }
 
@@ -109,13 +112,13 @@ fun ChatScreen(navController: NavController, canalId: String?) {
     //val usuario =
     //    user?.value?.id?.let { CanalViewModel().obtenerUsuarioPorId(it) } //esta linea obtiene el usuario segun la id que se le pasa y la guarda en una variable
 
-    val canal: Canales? by ChatViewModel().obtenerCanalPorId(canalId).observeAsState(null)
+    val canal: Canales? by chatViewModel.obtenerCanalPorId(canalId).observeAsState(null)
 
     /////////val sape: Usuarios? by canalViewModel.obtenerUsuarioPorId()
 
     //val usuario: Usuarios? by CanalViewModel().obtenerUsuarioPorId(mensaje.usuarioID).observeAsState(null)
 
-    val chatViewModel = ChatViewModel()
+
 
     canal?.let { chatViewModel.fetchFotoPerfil(it.imagenId) }
 
@@ -125,6 +128,10 @@ fun ChatScreen(navController: NavController, canalId: String?) {
 
     val imagenesFotoPerfil: List<Imagenes> by chatViewModel.obtenerImagenesFotoPerfil().observeAsState(listOf())
 
+    LaunchedEffect(Unit){
+        chatViewModel.obtenerMensajesPorCanal(canalId)
+    }
+
     val mensajesList by chatViewModel.mensajes.observeAsState(initial = listOf())
 
     val urlImagen by chatViewModel.urlFotoPerfil.observeAsState(initial = null)
@@ -132,6 +139,10 @@ fun ChatScreen(navController: NavController, canalId: String?) {
     var mensajeEnviado by remember { mutableStateOf("") }
 
     val nameChange = rememberSaveable { mutableStateOf("") }
+
+    val descripcionChange = rememberSaveable { mutableStateOf("") }
+
+
 
 
     Box(
@@ -279,6 +290,49 @@ fun ChatScreen(navController: NavController, canalId: String?) {
                                         .size(40.dp)
                                         .clickable {
                                             showDialogNombre.value = true
+                                        }
+                                )
+
+                            }
+                            Spacer(modifier = Modifier.height(15.dp))
+                            Text(text = "Descripción",
+                                fontWeight = FontWeight.Normal,
+                                color = textColor.value)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        color = backgroundColor.value,
+                                        shape = RoundedCornerShape(10.dp)
+                                    )
+                                    .border(
+                                        2.dp,
+                                        color = borderColor.value,
+                                        shape = RoundedCornerShape(10.dp)
+                                    )
+                                    .height(80.dp)
+                                    .padding(end = 16.dp, top = 8.dp, bottom = 8.dp),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Spacer(modifier = Modifier.width(40.dp))
+                                canal?.let {
+                                    Text(
+                                        text = it.descripcion,
+                                        style = TextStyle(
+                                            fontSize = 15.sp,
+                                            color = textColor.value
+                                        )
+                                    )
+                                }
+                                Spacer(modifier = Modifier.weight(1f))
+                                Image(
+                                    painter = rememberImagePainter(data = R.drawable.icon_editar),
+                                    contentDescription = "",
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clickable {
+                                            showDialogDescripcion.value = true
                                         }
                                 )
 
@@ -469,6 +523,7 @@ fun ChatScreen(navController: NavController, canalId: String?) {
                 }
             )
         }
+
         if (showDialogConfirmExit) {
             AlertDialog(
                 onDismissRequest = {
@@ -668,6 +723,65 @@ fun ChatScreen(navController: NavController, canalId: String?) {
             )
         }
 
+        if (showDialogDescripcion.value) {
+            AlertDialog(
+                onDismissRequest = { showDialogDescripcion.value = false },
+                title = { Text(
+                    style = TextStyle(
+                        fontSize = 22.sp,
+                        color = textColor.value
+                    ),
+                    text = "Descripción:") },
+                text = {
+                    Column {
+                        Text(text = "Cambiar descripción:",
+                            fontWeight = FontWeight.Normal,
+                            color = textColor.value)
+                        TextField(
+                            value = descripcionChange.value,
+                            onValueChange = { descripcionChange.value = it },
+                            placeholder = { canal?.let { Text(text = it.descripcion) } }
+                        )
+                        Spacer(modifier = Modifier.height(15.dp))
+                    }
+                },
+                confirmButton = {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Button(onClick = {
+                            showDialogOptions.value = true
+                            showDialogDescripcion.value = false
+                            descripcionChange.value=""
+                        }) {
+                            Text("Regresar")
+                        }
+                        Button(onClick = {
+
+                            val nuevaDescripcion = descripcionChange.value
+                            nuevaDescripcion.let {
+                                chatViewModel.actualizarDescripcion(it, canalId)
+                            }
+                            showDialogOptions.value = false
+                            showDialogDescripcion.value = false
+                            descripcionChange.value=""
+                        }) {
+                            Text("Guardar")
+                        }
+
+                    }
+                },
+                containerColor=backgroundColor.value,
+                shape = RoundedCornerShape(8.dp),
+                modifier=Modifier
+                    .border(2.dp, color=borderColor.value, RoundedCornerShape(8.dp))
+            )
+        }
+
         // 3. Mensajes del chat
 
         LazyColumn(
@@ -727,7 +841,7 @@ fun ChatScreen(navController: NavController, canalId: String?) {
 
                 IconButton(onClick = {
                     // Guardar el mensaje en Firebase
-                    ChatViewModel().EnviarMensaje(mensajeEnviado, canalId, user?.value?.id)
+                    chatViewModel.EnviarMensaje(mensajeEnviado, canalId, user?.value?.id)
                     mensajeEnviado = "" // resetea el campo después de enviar
                 }) {
                     Icon(Icons.Default.Send, contentDescription = "Enviar mensaje")
@@ -762,11 +876,11 @@ fun MessageItem(mensaje: Mensajes, isCurrentUser: Boolean, currentUserName: Stri
         ) {
             Column {
                 if (!isCurrentUser) {
-                    Text(text = "${usuario?.name}",
+                    Text(text = "${usuario?.name} - ${usuario?.occupation}",
                         fontWeight = FontWeight.Bold
                     )
                 } else {
-                    Text(text = currentUserName,
+                    Text(text = "${ currentUserName } - ${usuario?.occupation}",
                         fontWeight = FontWeight.Bold)
                 }
 
@@ -783,6 +897,6 @@ fun MessageItem(mensaje: Mensajes, isCurrentUser: Boolean, currentUserName: Stri
 }
 
 fun formatTime(timestamp: Timestamp?): String {
-    val sdf = SimpleDateFormat("hh:mm a", Locale.getDefault())
+    val sdf = SimpleDateFormat("hh:mm a dd/MM/yyyy", Locale.getDefault())
     return sdf.format(timestamp?.toDate() ?: Date())
 }
